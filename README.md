@@ -27,10 +27,12 @@ pnpm install
 pnpm dev
 ```
 
-## GitHub Pages Deployment
+## Vercel Deployment
 
-This repository includes a GitHub Actions workflow at:
+This project is configured for Vercel (Next.js with API routes and middleware).
 
-`.github/workflows/deploy-pages.yml`
+Required environment variable:
 
-The workflow builds the project and deploys the generated static artifact to GitHub Pages.
+- `GEMINI_API_KEY`
+
+Deploy by importing this repository into Vercel and setting the environment variable in Project Settings.

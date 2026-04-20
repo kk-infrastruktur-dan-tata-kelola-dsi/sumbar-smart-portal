@@ -483,7 +483,13 @@ export default function KeuanganDaerahPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} tickMargin={8} />
                       <YAxis tick={{ fontSize: 12 }} unit="%" />
-                      <Tooltip cursor={{ fill: "rgba(0,0,0,0.03)" }} formatter={(v: number) => [`${v}%`, "Realisasi"]} />
+                      <Tooltip
+                        cursor={{ fill: "rgba(0,0,0,0.03)" }}
+                        formatter={(v) => [
+                          `${Number(Array.isArray(v) ? v[0] : (v ?? 0))}%`,
+                          "Realisasi",
+                        ]}
+                      />
                       <Bar dataKey="nilai" radius={[4, 4, 0, 0]} fill="#f59e0b" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -505,7 +511,12 @@ export default function KeuanganDaerahPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis dataKey="year" tick={{ fontSize: 12 }} tickMargin={8} />
                     <YAxis tick={{ fontSize: 12 }} unit=" T" label={{ value: 'Triliun Rupiah', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }} />
-                    <Tooltip formatter={(v: number) => [`Rp ${v} T`, ""]} />
+                    <Tooltip
+                      formatter={(v) => [
+                        `Rp ${Number(Array.isArray(v) ? v[0] : (v ?? 0))} T`,
+                        "",
+                      ]}
+                    />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                     <Line 
                       type="monotone" 
