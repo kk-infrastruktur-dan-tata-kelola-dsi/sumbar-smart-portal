@@ -2,6 +2,7 @@
   "name": "next-app-template",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@10.22.0",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -47,7 +48,7 @@
     "@heroui/system": "2.4.23",
     "@heroui/table": "2.2.27",
     "@heroui/tabs": "2.2.24",
-    "@heroui/theme": "2.4.23",
+    "@heroui/theme": "^2.4.24",
     "@heroui/toast": "2.0.17",
     "@heroui/tooltip": "2.2.24",
     "@heroui/user": "2.2.22",

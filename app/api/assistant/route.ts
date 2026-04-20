@@ -35,6 +35,82 @@ const MODEL_FALLBACKS = [
   "gemini-2.0-flash-lite",
 ];
 
+const RATE_LIMIT_MAX_REQUESTS = 25;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+type RateLimitState = {
+  count: number;
+  resetAt: number;
+};
+
+const rateLimitStore = new Map<string, RateLimitState>();
+
+function getClientIdentifier(req: Request): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  const vercelForwardedFor = req.headers.get("x-vercel-forwarded-for");
+  const realIp = req.headers.get("x-real-ip");
+  const cfConnectingIp = req.headers.get("cf-connecting-ip");
+
+  const firstForwardedIp = forwardedFor?.split(",")[0]?.trim();
+  const firstVercelForwardedIp = vercelForwardedFor?.split(",")[0]?.trim();
+  const ip = cfConnectingIp || realIp || firstForwardedIp || firstVercelForwardedIp;
+
+  if (ip) {
+    return `ip:${ip}`;
+  }
+
+  const userAgent = req.headers.get("user-agent")?.slice(0, 120) || "unknown";
+  return `ua:${userAgent}`;
+}
+
+function checkRateLimit(req: Request) {
+  const now = Date.now();
+
+  if (rateLimitStore.size > 5000) {
+    rateLimitStore.forEach((state, key) => {
+      if (state.resetAt <= now) {
+        rateLimitStore.delete(key);
+      }
+    });
+  }
+
+  const clientId = getClientIdentifier(req);
+  const current = rateLimitStore.get(clientId);
+
+  if (!current || current.resetAt <= now) {
+    const resetAt = now + RATE_LIMIT_WINDOW_MS;
+    rateLimitStore.set(clientId, { count: 1, resetAt });
+    return {
+      allowed: true,
+      limit: RATE_LIMIT_MAX_REQUESTS,
+      remaining: RATE_LIMIT_MAX_REQUESTS - 1,
+      resetAt,
+      retryAfterSeconds: 0,
+    };
+  }
+
+  if (current.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return {
+      allowed: false,
+      limit: RATE_LIMIT_MAX_REQUESTS,
+      remaining: 0,
+      resetAt: current.resetAt,
+      retryAfterSeconds: Math.max(1, Math.ceil((current.resetAt - now) / 1000)),
+    };
+  }
+
+  current.count += 1;
+  rateLimitStore.set(clientId, current);
+
+  return {
+    allowed: true,
+    limit: RATE_LIMIT_MAX_REQUESTS,
+    remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - current.count),
+    resetAt: current.resetAt,
+    retryAfterSeconds: 0,
+  };
+}
+
 /**
  * Format semua data project untuk AI context
  */
@@ -116,6 +192,26 @@ function formatDataForAI(): string {
 }
 
 export async function POST(req: Request) {
+  const rateLimit = checkRateLimit(req);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        error: "Too many requests",
+        details: "Rate limit exceeded. Please wait before sending another request.",
+        retry_after_seconds: rateLimit.retryAfterSeconds,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+          "X-RateLimit-Limit": String(rateLimit.limit),
+          "X-RateLimit-Remaining": String(rateLimit.remaining),
+          "X-RateLimit-Reset": String(Math.ceil(rateLimit.resetAt / 1000)),
+        },
+      },
+    );
+  }
+
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
