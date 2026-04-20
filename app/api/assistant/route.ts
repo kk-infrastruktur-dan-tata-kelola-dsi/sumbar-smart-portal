@@ -43,6 +43,12 @@ type RateLimitState = {
   resetAt: number;
 };
 
+type GeminiErrorResponse = {
+  status: number;
+  error: string;
+  details: string;
+};
+
 const rateLimitStore = new Map<string, RateLimitState>();
 
 function getClientIdentifier(req: Request): string {
@@ -108,6 +114,75 @@ function checkRateLimit(req: Request) {
     remaining: Math.max(0, RATE_LIMIT_MAX_REQUESTS - current.count),
     resetAt: current.resetAt,
     retryAfterSeconds: 0,
+  };
+}
+
+function extractGeminiStatusCode(err: unknown, message: string): number | null {
+  const maybe = err as {
+    status?: number;
+    statusCode?: number;
+    response?: { status?: number };
+    cause?: { status?: number };
+  };
+
+  const directStatus =
+    maybe?.status ??
+    maybe?.statusCode ??
+    maybe?.response?.status ??
+    maybe?.cause?.status;
+  if (typeof directStatus === "number") return directStatus;
+
+  const bracketStatusMatch = message.match(/\[(\d{3})[^\]]*\]/);
+  if (bracketStatusMatch) return Number(bracketStatusMatch[1]);
+
+  const textStatusMatch = message.match(/\bstatus(?:\s*code)?\s*[:=]\s*(\d{3})\b/i);
+  if (textStatusMatch) return Number(textStatusMatch[1]);
+
+  return null;
+}
+
+function mapGeminiError(err: unknown): GeminiErrorResponse {
+  const rawMessage =
+    err instanceof Error ? err.message : typeof err === "string" ? err : "Unknown Gemini API error";
+  const statusCode = extractGeminiStatusCode(err, rawMessage);
+
+  if (statusCode === 400) {
+    return {
+      status: 400,
+      error: "Invalid Gemini request",
+      details: rawMessage,
+    };
+  }
+
+  if (statusCode === 403) {
+    return {
+      status: 503,
+      error: "Gemini access denied",
+      details:
+        "Google rejected GEMINI_API_KEY (403). Ensure the key is valid, Generative Language API is enabled, and API-key restrictions do not block server-side requests.",
+    };
+  }
+
+  if (statusCode === 429) {
+    return {
+      status: 503,
+      error: "Gemini quota exceeded",
+      details: "Gemini API quota/rate limit exceeded. Try again later or increase quota.",
+    };
+  }
+
+  if (statusCode === 401) {
+    return {
+      status: 503,
+      error: "Invalid Gemini credentials",
+      details: "GEMINI_API_KEY is invalid or unauthorized for this project.",
+    };
+  }
+
+  return {
+    status: 502,
+    error: "Gemini API error",
+    details: rawMessage,
   };
 }
 
@@ -600,9 +675,10 @@ Sekarang jawab pertanyaan user dengan konteks di atas: "${finalPrompt}"`;
           },
         });
       } catch (err: any) {
+        const providerError = mapGeminiError(err);
         return NextResponse.json(
-          { error: "Gemini streaming error", details: err.message },
-          { status: 500 }
+          { error: providerError.error, details: providerError.details },
+          { status: providerError.status }
         );
       }
     }
@@ -617,9 +693,10 @@ Sekarang jawab pertanyaan user dengan konteks di atas: "${finalPrompt}"`;
         headers: { "Content-Type": "text/plain; charset=utf-8" },
       });
     } catch (err: any) {
+      const providerError = mapGeminiError(err);
       return NextResponse.json(
-        { error: "Gemini API error", details: err.message },
-        { status: 500 }
+        { error: providerError.error, details: providerError.details },
+        { status: providerError.status }
       );
     }
   } catch (err: any) {
