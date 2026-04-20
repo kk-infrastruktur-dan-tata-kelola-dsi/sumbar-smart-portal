@@ -1,0 +1,82 @@
+[
+  {
+    "id": "pengumuman-001",
+    "judul": "Seleksi CPNS Pemerintah Provinsi Sumatera Barat 2026",
+    "deskripsi": "Pendaftaran seleksi CPNS dibuka mulai 12 Mei 2026. Pelamar wajib membaca ketentuan formasi, jadwal, dan persyaratan berkas secara lengkap sebelum mendaftar.",
+    "status": "penting",
+    "file_url": "https://example.com/dokumen/cpns-2026.pdf",
+    "created_at": "2026-04-10T08:00:00.000Z"
+  },
+  {
+    "id": "pengumuman-002",
+    "judul": "Program Beasiswa Unggulan Daerah Tahun Akademik 2026/2027",
+    "deskripsi": "Pemerintah Provinsi Sumbar membuka beasiswa untuk mahasiswa berprestasi dari keluarga rentan. Kuota awal 1.200 penerima.",
+    "status": "penting",
+    "file_url": "https://example.com/dokumen/beasiswa-unggulan-2026.pdf",
+    "created_at": "2026-04-07T10:15:00.000Z"
+  },
+  {
+    "id": "pengumuman-003",
+    "judul": "Perubahan jadwal layanan Samsat keliling selama libur nasional",
+    "deskripsi": "Layanan Samsat keliling menyesuaikan jam operasional di beberapa titik. Masyarakat diimbau mengecek jadwal terbaru sebelum berkunjung.",
+    "status": "info",
+    "file_url": "https://example.com/dokumen/jadwal-samsat-keliling.pdf",
+    "created_at": "2026-04-05T06:30:00.000Z"
+  },
+  {
+    "id": "pengumuman-004",
+    "judul": "Pelatihan UMKM Digital Batch II",
+    "deskripsi": "Pelatihan pemasaran digital untuk UMKM akan dilaksanakan hybrid selama empat minggu dengan mentor dari industri.",
+    "status": "info",
+    "file_url": "https://example.com/dokumen/pelatihan-umkm-digital.pdf",
+    "created_at": "2026-04-03T12:00:00.000Z"
+  },
+  {
+    "id": "pengumuman-005",
+    "judul": "Pendaftaran Mudik Gratis 2026",
+    "deskripsi": "Program mudik gratis untuk warga Sumbar perantau dibuka dengan rute utama Jakarta - Padang dan Bandung - Bukittinggi.",
+    "status": "penting",
+    "file_url": "https://example.com/dokumen/mudik-gratis-2026.pdf",
+    "created_at": "2026-03-29T09:40:00.000Z"
+  },
+  {
+    "id": "pengumuman-006",
+    "judul": "Pemeliharaan sistem layanan perizinan online",
+    "deskripsi": "Sistem OSS daerah akan mengalami pemeliharaan rutin pada Sabtu malam pukul 22.00 - 01.00 WIB.",
+    "status": "info",
+    "file_url": null,
+    "created_at": "2026-03-26T14:20:00.000Z"
+  },
+  {
+    "id": "pengumuman-007",
+    "judul": "Penyaluran bantuan bencana banjir tahap I",
+    "deskripsi": "Penyaluran bantuan logistik dan kebutuhan pokok dimulai di wilayah terdampak dengan skema distribusi terpadu.",
+    "status": "penting",
+    "file_url": "https://example.com/dokumen/bantuan-banjir-tahap-1.pdf",
+    "created_at": "2026-03-21T07:50:00.000Z"
+  },
+  {
+    "id": "pengumuman-008",
+    "judul": "Rilis laporan kinerja pembangunan triwulan I 2026",
+    "deskripsi": "Dokumen ringkasan capaian pembangunan daerah triwulan I telah dipublikasikan untuk akses publik.",
+    "status": "info",
+    "file_url": "https://example.com/dokumen/laporan-kinerja-triwulan-1-2026.pdf",
+    "created_at": "2026-03-17T11:35:00.000Z"
+  },
+  {
+    "id": "pengumuman-009",
+    "judul": "Perubahan lalu lintas sekitar Kantor Gubernur saat acara kenegaraan",
+    "deskripsi": "Rekayasa lalu lintas diberlakukan sementara pada Jumat pagi. Pengguna jalan diminta mengikuti arahan petugas.",
+    "status": "info",
+    "file_url": null,
+    "created_at": "2026-03-14T05:45:00.000Z"
+  },
+  {
+    "id": "pengumuman-010",
+    "judul": "Pembukaan lowongan tenaga kesehatan kontrak daerah",
+    "deskripsi": "Formasi tenaga kesehatan kontrak daerah dibuka untuk mendukung layanan di puskesmas dan rumah sakit daerah.",
+    "status": "penting",
+    "file_url": "https://example.com/dokumen/lowongan-nakes-kontrak-2026.pdf",
+    "created_at": "2026-03-09T09:15:00.000Z"
+  }
+]

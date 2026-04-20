@@ -1,9 +1,7 @@
-import type { NextRequest } from "next/server";
-import { createClient as handleSupabase } from "./utils/supabase/middleware";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  // Delegate to Supabase middleware helper to refresh session cookies
-  return await handleSupabase(request);
+export function middleware(_request: NextRequest) {
+  return NextResponse.next();
 }
 
 // Exclude Next.js internals and static assets from middleware

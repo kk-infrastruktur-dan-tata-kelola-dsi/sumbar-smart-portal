@@ -1,88 +1,86 @@
 "use client";
 
+import type {
+  BudayaItemWithRelations,
+  KabupatenWithItems,
+} from "@/types/budaya";
+
 import React from "react";
 import { Card } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Chip } from "@heroui/chip";
 import { Skeleton } from "@heroui/skeleton";
-import { Search, Filter, MapPin, Star, X, Share2, Heart } from "lucide-react";
+import { Search, MapPin, Star, X, Share2, Heart } from "lucide-react";
 import Image from "next/image";
+
 import MapSumbar from "../../components/MapSumbar";
+
 import DetailDialog from "./DetailDialog";
-import type { BudayaItemWithRelations, KabupatenWithItems } from "@/types/budaya";
+
+import { getBudayaItems, getKabupatens } from "@/utils/budaya-queries";
 
 export default function BudayaPage() {
-  const MAP_DEBUG = process.env.NEXT_PUBLIC_MAP_DEBUG === '1';
+  const MAP_DEBUG = process.env.NEXT_PUBLIC_MAP_DEBUG === "1";
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState("Semua");
-  const [selectedKabupaten, setSelectedKabupaten] = React.useState<string | null>(null);
+  const [selectedKabupaten, setSelectedKabupaten] = React.useState<
+    string | null
+  >(null);
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
-  const [selectedItem, setSelectedItem] = React.useState<BudayaItemWithRelations | null>(null);
-  
+  const [selectedItem, setSelectedItem] =
+    React.useState<BudayaItemWithRelations | null>(null);
+
   // State untuk data dari database
   const [items, setItems] = React.useState<BudayaItemWithRelations[]>([]);
   const [kabupatens, setKabupatens] = React.useState<KabupatenWithItems[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Load data menggunakan Next.js API routes (lebih konsisten cross-browser)
+  // Load data from local dummy data queries
   React.useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch kabupatens via API route
-        const kabResponse = await fetch('/api/budaya/kabupatens', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-store', // Ensure fresh data for debugging
-        });
+        const [kabData, itemsResult] = await Promise.all([
+          getKabupatens(true),
+          getBudayaItems({
+            status: "published",
+            limit: 200,
+            order_by: "rating",
+            order_direction: "desc",
+          }),
+        ]);
 
-        if (!kabResponse.ok) {
-          throw new Error(`Kabupaten fetch failed: ${kabResponse.status} ${kabResponse.statusText}`);
-        }
-
-        const kabData = await kabResponse.json();
-
-        // Fetch budaya items via API route (all published items)
-        const itemsResponse = await fetch('/api/budaya?limit=200', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-store',
-        });
-
-        if (!itemsResponse.ok) {
-          throw new Error(`Items fetch failed: ${itemsResponse.status} ${itemsResponse.statusText}`);
-        }
-
-        const itemsResult = await itemsResponse.json();
         const itemsData = itemsResult.items || [];
 
         setKabupatens(kabData || []);
         setItems(itemsData);
 
         if (MAP_DEBUG) {
-          console.info("[BudayaPage] Loaded data via API routes", {
+          console.info("[BudayaPage] Loaded data via local query utilities", {
             kabupatens: kabData?.length || 0,
             items: itemsData?.length || 0,
             kabSample: kabData?.slice(0, 2),
             itemsSample: itemsData?.slice(0, 2),
           });
           if (!kabData?.length) {
-            console.warn("[BudayaPage] No kabupatens returned from API. Map will render without pins.");
+            console.warn(
+              "[BudayaPage] No kabupatens returned from dummy dataset. Map will render without pins.",
+            );
           }
           if (!itemsData?.length) {
-            console.warn("[BudayaPage] No budaya_items returned (status=published). List may be empty.");
+            console.warn(
+              "[BudayaPage] No budaya_items returned (status=published).",
+            );
           }
         }
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Unknown error loading data';
+        const errorMsg =
+          err instanceof Error ? err.message : "Unknown error loading data";
+
         console.error("[BudayaPage] Error loading budaya data:", err);
         setError(errorMsg);
       } finally {
@@ -105,7 +103,10 @@ export default function BudayaPage() {
   const kabupatenData = React.useMemo(() => {
     return kabupatens.map((kab) => {
       // Use item_count from API if available, else calculate from items array
-      const itemCount = kab.item_count ?? items.filter((item) => item.kabupaten?.slug === kab.slug).length;
+      const itemCount =
+        kab.item_count ??
+        items.filter((item) => item.kabupaten?.slug === kab.slug).length;
+
       return {
         name: kab.name,
         key: kab.slug,
@@ -132,7 +133,9 @@ export default function BudayaPage() {
       // Filter by search query
       const matchesSearch =
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.kabupaten?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.kabupaten?.name
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         item.description?.toLowerCase().includes(searchQuery.toLowerCase());
 
       // Filter by type (Semua, Objek, Tradisi, Kuliner)
@@ -146,18 +149,17 @@ export default function BudayaPage() {
 
       // Filter by kabupaten
       const matchesKabupaten =
-        !selectedKabupaten ||
-        item.kabupaten?.slug === selectedKabupaten;
+        !selectedKabupaten || item.kabupaten?.slug === selectedKabupaten;
 
       return matchesSearch && matchesType && matchesKabupaten;
     });
 
-    console.log('[BudayaPage] 🔍 Filtering results', {
+    console.log("[BudayaPage] 🔍 Filtering results", {
       totalItems: items.length,
       filteredCount: filtered.length,
       selectedKabupaten,
       selectedCategory,
-      searchQuery
+      searchQuery,
     });
 
     return filtered;
@@ -169,25 +171,36 @@ export default function BudayaPage() {
     if (url.startsWith("https://")) return url;
     if (url.startsWith("http://")) return "https://" + url.slice(7);
     if (url.startsWith("//")) return `https:${url}`;
+
     return `https://${url}`;
   };
 
-  const handleKabupatenClick = React.useCallback((key: string) => {
-    // ALWAYS log (critical for debugging Chrome issue)
-    console.log('[BudayaPage] ✅ handleKabupatenClick CALLED', { 
-      key, 
-      browser: navigator.userAgent.includes('Chrome') ? 'Chrome/Edge' : 'Other',
-      timestamp: new Date().toISOString(),
-      MAP_DEBUG
-    });
-    
-    // Toggle: jika sudah selected, clear filter; jika belum, set filter
-    setSelectedKabupaten((prev) => {
-      const newValue = prev === key ? null : key;
-      console.log('[BudayaPage] ✅ State changing', { from: prev, to: newValue });
-      return newValue;
-    });
-  }, [MAP_DEBUG]);
+  const handleKabupatenClick = React.useCallback(
+    (key: string) => {
+      // ALWAYS log (critical for debugging Chrome issue)
+      console.log("[BudayaPage] ✅ handleKabupatenClick CALLED", {
+        key,
+        browser: navigator.userAgent.includes("Chrome")
+          ? "Chrome/Edge"
+          : "Other",
+        timestamp: new Date().toISOString(),
+        MAP_DEBUG,
+      });
+
+      // Toggle: jika sudah selected, clear filter; jika belum, set filter
+      setSelectedKabupaten((prev) => {
+        const newValue = prev === key ? null : key;
+
+        console.log("[BudayaPage] ✅ State changing", {
+          from: prev,
+          to: newValue,
+        });
+
+        return newValue;
+      });
+    },
+    [MAP_DEBUG],
+  );
 
   const openDetail = (item: BudayaItemWithRelations) => {
     setSelectedItem(item);
@@ -205,12 +218,11 @@ export default function BudayaPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold mb-2 text-red-600">Gagal Memuat Data</h2>
+          <h2 className="text-2xl font-bold mb-2 text-red-600">
+            Gagal Memuat Data
+          </h2>
           <p className="text-foreground-600 mb-4">{error}</p>
-          <Button 
-            color="warning" 
-            onPress={() => window.location.reload()}
-          >
+          <Button color="warning" onPress={() => window.location.reload()}>
             Coba Lagi
           </Button>
         </div>
@@ -229,12 +241,14 @@ export default function BudayaPage() {
               Budaya Sumbar
             </h1>
             <div className="flex items-center gap-2 text-sm text-foreground-600 mb-4 justify-center">
-              <span><MapPin size={16}></MapPin></span>
+              <span>
+                <MapPin size={16} />
+              </span>
               <span>Jelajah Kekayaan Budaya Sumatera Barat</span>
             </div>
             <p className="text-lg opacity-90 max-w-3xl mx-auto mb-8">
-              Menampilkan warisan budaya, kuliner, dan destinasi alam Sumbar dengan
-              storytelling visual dan konten interaktif.
+              Menampilkan warisan budaya, kuliner, dan destinasi alam Sumbar
+              dengan storytelling visual dan konten interaktif.
             </p>
             {/* Keep search bar as skeleton while loading */}
             <Skeleton className="h-12 w-full max-w-xl mx-auto rounded-lg" />
@@ -294,30 +308,33 @@ export default function BudayaPage() {
       {/* Header Section */}
       <div className="text-black">
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">
-            Budaya Sumbar
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-3">Budaya Sumbar</h1>
           <div className="flex items-center gap-2 text-sm text-foreground-600 mb-4 justify-center">
-            <span><MapPin size={16}></MapPin></span>
+            <span>
+              <MapPin size={16} />
+            </span>
             <span>Jelajah Kekayaan Budaya Sumatera Barat</span>
           </div>
           <p className="text-lg opacity-90 max-w-3xl mx-auto mb-8">
-            Menampilkan warisan budaya, kuliner, dan destinasi alam Sumbar dengan
-            storytelling visual dan konten interaktif.
+            Menampilkan warisan budaya, kuliner, dan destinasi alam Sumbar
+            dengan storytelling visual dan konten interaktif.
           </p>
 
           {/* Search Bar */}
           <div className="flex gap-3 flex-wrap justify-center max-w-xl mx-auto">
             <Input
-              placeholder="Cari budaya..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              startContent={<Search className="text-foreground-500" size={20} />}
+              className="flex-1 min-w-[280px]"
               classNames={{
                 input: "text-base",
-                inputWrapper: "bg-gray-50 border-2 border-gray-300 shadow-md h-12 hover:border-gray-400 focus-within:!border-foreground-900 transition-colors",
+                inputWrapper:
+                  "bg-gray-50 border-2 border-gray-300 shadow-md h-12 hover:border-gray-400 focus-within:!border-foreground-900 transition-colors",
               }}
-              className="flex-1 min-w-[280px]"
+              placeholder="Cari budaya..."
+              startContent={
+                <Search className="text-foreground-500" size={20} />
+              }
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
@@ -332,12 +349,14 @@ export default function BudayaPage() {
               {categories.map((cat) => (
                 <Button
                   key={cat.name}
-                  variant={selectedCategory === cat.name ? "solid" : "bordered"}
+                  className={
+                    selectedCategory === cat.name ? "font-semibold" : ""
+                  }
                   color={selectedCategory === cat.name ? "warning" : "default"}
                   size="sm"
-                  onPress={() => setSelectedCategory(cat.name)}
                   startContent={<span>{cat.icon}</span>}
-                  className={selectedCategory === cat.name ? "font-semibold" : ""}
+                  variant={selectedCategory === cat.name ? "solid" : "bordered"}
+                  onPress={() => setSelectedCategory(cat.name)}
                 >
                   {cat.name}
                 </Button>
@@ -347,15 +366,19 @@ export default function BudayaPage() {
             {/* Destinations Count */}
             <div className="flex items-center justify-between">
               <p className="text-foreground-600">
-                Menampilkan <span className="font-semibold text-foreground-900">{filteredDestinations.length}</span> dokumentasi budaya
+                Menampilkan{" "}
+                <span className="font-semibold text-foreground-900">
+                  {filteredDestinations.length}
+                </span>{" "}
+                dokumentasi budaya
               </p>
               {selectedKabupaten && (
                 <Button
-                  size="sm"
                   color="warning"
+                  size="sm"
+                  startContent={<X size={14} />}
                   variant="flat"
                   onPress={() => setSelectedKabupaten(null)}
-                  startContent={<X size={14} />}
                 >
                   Reset Filter
                 </Button>
@@ -365,39 +388,42 @@ export default function BudayaPage() {
             {/* Destinations Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredDestinations.map((dest) => (
-                <Card key={dest.id} className="overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow group">
+                <Card
+                  key={dest.id}
+                  className="overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow group"
+                >
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={toHttps(dest.image_url)}
-                      alt={dest.name}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                       unoptimized
+                      alt={dest.name}
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      src={toHttps(dest.image_url)}
                     />
                     <div className="absolute top-2 right-2 flex gap-2">
                       <Button
                         isIconOnly
+                        className="bg-white/90 backdrop-blur"
                         size="sm"
                         variant="flat"
-                        className="bg-white/90 backdrop-blur"
                       >
-                        <Heart size={16}></Heart>
+                        <Heart size={16} />
                       </Button>
                       <Button
                         isIconOnly
+                        className="bg-white/90 backdrop-blur"
                         size="sm"
                         variant="flat"
-                        className="bg-white/90 backdrop-blur"
                       >
-                        <Share2 size={16}></Share2>
+                        <Share2 size={16} />
                       </Button>
                     </div>
                     <div className="absolute bottom-2 left-2">
                       <Chip
-                        startContent={<span>📍</span>}
-                        size="sm"
                         className="bg-white/90 backdrop-blur font-medium"
+                        size="sm"
+                        startContent={<span>📍</span>}
                       >
                         {dest.kabupaten?.name || ""}
                       </Chip>
@@ -409,9 +435,13 @@ export default function BudayaPage() {
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-bold text-base">{dest.name}</h3>
                       <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                        <Star size={14} className="fill-warning text-warning" />
-                        <span className="font-semibold text-sm">{dest.rating}</span>
-                        <span className="text-xs text-foreground-400">({dest.reviews_count})</span>
+                        <Star className="fill-warning text-warning" size={14} />
+                        <span className="font-semibold text-sm">
+                          {dest.rating}
+                        </span>
+                        <span className="text-xs text-foreground-400">
+                          ({dest.reviews_count})
+                        </span>
                       </div>
                     </div>
 
@@ -420,20 +450,27 @@ export default function BudayaPage() {
                     </p>
 
                     <div className="flex flex-wrap gap-1.5">
-                      {dest.tags?.slice(0, 3).map((tag: string, idx: number) => (
-                        <Chip
-                          key={idx}
-                          size="sm"
-                          variant="flat"
-                          className="text-xs"
-                        >
-                          {tag}
-                        </Chip>
-                      ))}
+                      {dest.tags
+                        ?.slice(0, 3)
+                        .map((tag: string, idx: number) => (
+                          <Chip
+                            key={idx}
+                            className="text-xs"
+                            size="sm"
+                            variant="flat"
+                          >
+                            {tag}
+                          </Chip>
+                        ))}
                     </div>
 
                     <div className="mt-4 flex justify-end">
-                      <Button size="sm" color="warning" variant="flat" onPress={() => openDetail(dest)}>
+                      <Button
+                        color="warning"
+                        size="sm"
+                        variant="flat"
+                        onPress={() => openDetail(dest)}
+                      >
                         Lihat detail
                       </Button>
                     </div>
@@ -446,8 +483,12 @@ export default function BudayaPage() {
             {filteredDestinations.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-5xl mb-3">🔍</div>
-                <h3 className="text-lg font-semibold mb-2">Tidak ada destinasi ditemukan</h3>
-                <p className="text-sm text-foreground-500">Coba ubah kata kunci atau filter pencarian Anda</p>
+                <h3 className="text-lg font-semibold mb-2">
+                  Tidak ada destinasi ditemukan
+                </h3>
+                <p className="text-sm text-foreground-500">
+                  Coba ubah kata kunci atau filter pencarian Anda
+                </p>
               </div>
             )}
           </div>
@@ -457,43 +498,56 @@ export default function BudayaPage() {
             <Card className="sticky top-4 overflow-hidden border border-gray-200 shadow-sm">
               <div className="bg-white p-4">
                 <h3 className="font-bold text-lg mb-1">Peta Budaya</h3>
-                <p className="text-sm text-foreground-600">Klik pin untuk memfilter semua konten: objek, tradisi, dan kuliner</p>
+                <p className="text-sm text-foreground-600">
+                  Klik pin untuk memfilter semua konten: objek, tradisi, dan
+                  kuliner
+                </p>
               </div>
-              {(kabupatenData.length === 0 || !kabupatenData.some(k => Number(k.lat) && Number(k.lng))) && (
+              {(kabupatenData.length === 0 ||
+                !kabupatenData.some((k) => Number(k.lat) && Number(k.lng))) && (
                 <div className="px-4 pb-2 text-sm text-red-600">
-                  Data peta belum tersedia atau koordinat belum terisi. Pastikan data kabupaten dan koordinat ada di database.
+                  Data peta belum tersedia atau koordinat belum terisi. Pastikan
+                  data kabupaten dan koordinat ada di database.
                 </div>
               )}
-              
+
               <div className="relative h-[600px] bg-white">
                 <MapSumbar
+                  debug={process.env.NEXT_PUBLIC_MAP_DEBUG === "1"}
                   items={kabupatenData as any}
-                  onSelect={(key: string) => handleKabupatenClick(key)}
                   selectedKey={selectedKabupaten}
-                  debug={process.env.NEXT_PUBLIC_MAP_DEBUG === '1'}
+                  onSelect={(key: string) => handleKabupatenClick(key)}
                 />
               </div>
 
               {/* Map Legend */}
               <div className="p-4 bg-white border-t">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-foreground-700">Kabupaten/Kota</span>
-                  <span className="text-xs text-foreground-500">{kabupatenData.length} lokasi</span>
+                  <span className="text-sm font-semibold text-foreground-700">
+                    Kabupaten/Kota
+                  </span>
+                  <span className="text-xs text-foreground-500">
+                    {kabupatenData.length} lokasi
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {kabupatenData.map((kab) => (
                     <button
                       key={kab.key}
-                      onClick={() => handleKabupatenClick(kab.key)}
                       className={`flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left ${
-                        selectedKabupaten === kab.key ? "bg-gray-100 ring-2 ring-warning" : "bg-white border border-gray-200"
+                        selectedKabupaten === kab.key
+                          ? "bg-gray-100 ring-2 ring-warning"
+                          : "bg-white border border-gray-200"
                       }`}
+                      onClick={() => handleKabupatenClick(kab.key)}
                     >
-                      <div 
-                        className="w-3 h-3 rounded-full flex-shrink-0" 
+                      <div
+                        className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: kab.color }}
-                      ></div>
-                      <span className="text-xs font-medium truncate">{kab.name}</span>
+                      />
+                      <span className="text-xs font-medium truncate">
+                        {kab.name}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -504,7 +558,11 @@ export default function BudayaPage() {
       </div>
 
       {/* Dialog Detail Item */}
-      <DetailDialog isOpen={isDetailOpen} onClose={closeDetail} item={selectedItem} />
+      <DetailDialog
+        isOpen={isDetailOpen}
+        item={selectedItem}
+        onClose={closeDetail}
+      />
     </div>
   );
 }

@@ -1,41 +1,27 @@
 "use client";
 
 import React from "react";
-import CardPengumuman from "@/components/card_pengumuman";
 import { Skeleton } from "@heroui/skeleton";
 import { Card } from "@heroui/card";
 import { Bell } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
-import Link from "next/link";
 
-interface Pengumuman {
-  id: string;
-  judul: string;
-  deskripsi: string;
-  status: string;
-  file_url: string | null;
-  created_at: string;
-}
+import CardPengumuman from "@/components/card_pengumuman";
+import { getPengumuman, type Pengumuman } from "@/utils/pengumuman-queries";
 
 export default function PengumumanPage() {
   const [pengumumanData, setPengumumanData] = React.useState<Pengumuman[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [currentPage, setCurrentPage] = React.useState(1);
-  
+
   const ITEMS_PER_PAGE = 9;
 
   React.useEffect(() => {
     async function loadData() {
       try {
         setLoading(true);
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from("pengumuman")
-          .select("*")
-          .order("created_at", { ascending: false });
+        const data = await getPengumuman();
 
-        if (error) throw error;
-        setPengumumanData(data || []);
+        setPengumumanData(data);
       } catch (error) {
         console.error("Error loading pengumuman:", error);
       } finally {
@@ -60,13 +46,13 @@ export default function PengumumanPage() {
             Pengumuman
           </h1>
           <p className="text-lg opacity-90 max-w-3xl mx-auto mb-8">
-            Informasi dan pengumuman terkini dari Pemerintah Provinsi Sumatera Barat
+            Informasi dan pengumuman terkini dari Pemerintah Provinsi Sumatera
+            Barat
           </p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-
         {loading ? (
           <>
             {/* Skeleton Loading */}
@@ -107,20 +93,26 @@ export default function PengumumanPage() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {paginatedData.map((pengumuman) => {
-                const validStatus = pengumuman.status?.toLowerCase() === 'penting' ? 'penting' : 'info';
-                
+                const validStatus =
+                  pengumuman.status?.toLowerCase() === "penting"
+                    ? "penting"
+                    : "info";
+
                 return (
                   <CardPengumuman
                     key={pengumuman.id}
-                    status={validStatus}
-                    judul={pengumuman.judul}
                     desc_preview={pengumuman.deskripsi}
-                    tanggal={new Date(pengumuman.created_at).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
                     fileUrl={pengumuman.file_url}
+                    judul={pengumuman.judul}
+                    status={validStatus}
+                    tanggal={new Date(pengumuman.created_at).toLocaleDateString(
+                      "id-ID",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      },
+                    )}
                   />
                 );
               })}
@@ -132,76 +124,107 @@ export default function PengumumanPage() {
                 <div className="flex items-center gap-1">
                   {/* Previous Button */}
                   <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
                     className={`p-2 rounded-md transition-all ${
                       currentPage === 1
-                        ? 'pointer-events-none opacity-40 text-gray-400'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        ? "pointer-events-none opacity-40 text-gray-400"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }`}
+                    disabled={currentPage === 1}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M15 19l-7-7 7-7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                      />
                     </svg>
                   </button>
 
                   {/* Page Numbers */}
                   <div className="flex items-center gap-1 mx-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                      const showPage = 
-                        page === 1 || 
-                        page === totalPages || 
-                        (page >= currentPage - 1 && page <= currentPage + 1);
-                      
-                      const showEllipsis = 
-                        (page === currentPage - 2 && currentPage > 3) ||
-                        (page === currentPage + 2 && currentPage < totalPages - 2);
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => {
+                        const showPage =
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1);
 
-                      if (showEllipsis) {
+                        const showEllipsis =
+                          (page === currentPage - 2 && currentPage > 3) ||
+                          (page === currentPage + 2 &&
+                            currentPage < totalPages - 2);
+
+                        if (showEllipsis) {
+                          return (
+                            <span
+                              key={page}
+                              className="px-2 text-gray-400 text-sm"
+                            >
+                              ···
+                            </span>
+                          );
+                        }
+
+                        if (!showPage) return null;
+
                         return (
-                          <span key={page} className="px-2 text-gray-400 text-sm">
-                            ···
-                          </span>
+                          <button
+                            key={page}
+                            className={`min-w-[32px] h-8 flex items-center justify-center rounded-md text-sm font-medium transition-all ${
+                              currentPage === page
+                                ? "bg-warning text-white shadow-sm"
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </button>
                         );
-                      }
-
-                      if (!showPage) return null;
-
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`min-w-[32px] h-8 flex items-center justify-center rounded-md text-sm font-medium transition-all ${
-                            currentPage === page
-                              ? 'bg-warning text-white shadow-sm'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    })}
+                      },
+                    )}
                   </div>
 
                   {/* Next Button */}
                   <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
                     className={`p-2 rounded-md transition-all ${
                       currentPage === totalPages
-                        ? 'pointer-events-none opacity-40 text-gray-400'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        ? "pointer-events-none opacity-40 text-gray-400"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                     }`}
+                    disabled={currentPage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M9 5l7 7-7 7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                      />
                     </svg>
                   </button>
                 </div>
 
                 {/* Info */}
                 <p className="text-xs text-gray-500">
-                  {startIndex + 1}–{Math.min(endIndex, pengumumanData.length)} dari {pengumumanData.length} pengumuman
+                  {startIndex + 1}–{Math.min(endIndex, pengumumanData.length)}{" "}
+                  dari {pengumumanData.length} pengumuman
                 </p>
               </div>
             )}

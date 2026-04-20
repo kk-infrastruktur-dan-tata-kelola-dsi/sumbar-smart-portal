@@ -1,53 +1,36 @@
-# Next.js & HeroUI Template
+# Sumbar Smart Portal
 
-This is a template for creating applications using Next.js 14 (app directory) and HeroUI (v2).
+Sumbar Smart Portal is a **24-hour project** built during the **Firetech Event by Neotelemetri in 2025**.
 
-[Try it on CodeSandbox](https://githubbox.com/heroui-inc/heroui/next-app-template)
+## Team
 
-## Technologies Used
+Team members are listed from repository contributors:
 
-- [Next.js 14](https://nextjs.org/docs/getting-started)
-- [HeroUI v2](https://heroui.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Tailwind Variants](https://tailwind-variants.org)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
+- abrar
+- nabilrn
+- Nabil
+- Radithya21
+- rmdsftr
 
-## How to Use
+## Stack
 
-### Use the template with create-next-app
+- Next.js
+- React
+- TypeScript
+- HeroUI
+- Tailwind CSS
 
-To create a new project based on this template using `create-next-app`, run the following command:
-
-```bash
-npx create-next-app -e https://github.com/heroui-inc/next-app-template
-```
-
-### Install dependencies
-
-You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
+## Development
 
 ```bash
-npm install
+pnpm install
+pnpm dev
 ```
 
-### Run the development server
+## GitHub Pages Deployment
 
-```bash
-npm run dev
-```
+This repository includes a GitHub Actions workflow at:
 
-### Setup pnpm (optional)
+`.github/workflows/deploy-pages.yml`
 
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
-
-```bash
-public-hoist-pattern[]=*@heroui/*
-```
-
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
-
-## License
-
-Licensed under the [MIT license](https://github.com/heroui-inc/next-app-template/blob/main/LICENSE).
+The workflow builds the project and deploys the generated static artifact to GitHub Pages.

@@ -1,343 +1,318 @@
-// Budaya database queries using Supabase
-import { createClient } from '@/utils/supabase/server';
 import type {
+  BudayaCategory,
+  BudayaImage,
   BudayaItem,
   BudayaItemWithRelations,
+  BudayaReview,
+  BudayaStats,
   Kabupaten,
-  BudayaCategory,
+  KabupatenWithItems,
+  CreateReviewParams,
   GetBudayaItemsParams,
   GetBudayaItemsResponse,
-  CreateReviewParams,
-  BudayaStats,
-  KabupatenWithItems,
-} from '@/types/budaya';
+} from "@/types/budaya";
 
-/**
- * Get all kabupatens with optional item counts
- */
-export async function getKabupatens(includeItemCount = false): Promise<KabupatenWithItems[]> {
-  const supabase = await createClient();
-  
-  let query = supabase
-    .from('kabupatens')
-    .select('*')
-    .order('name');
+import budayaData from "@/data/dummy/budaya.json";
 
-  const { data, error } = await query;
+type BudayaDataset = {
+  kabupatens: Kabupaten[];
+  categories: BudayaCategory[];
+  items: BudayaItem[];
+  images: BudayaImage[];
+  reviews: BudayaReview[];
+};
 
-  if (error) {
-    console.error('Error fetching kabupatens:', error);
-    throw error;
-  }
+const dataset = budayaData as BudayaDataset;
+const kabupatenById = new Map(dataset.kabupatens.map((kab) => [kab.id, kab]));
+const categoryById = new Map(
+  dataset.categories.map((category) => [category.id, category]),
+);
 
-  if (!includeItemCount) {
-    return data as KabupatenWithItems[];
-  }
+function mapBudayaItemWithRelations(item: BudayaItem): BudayaItemWithRelations {
+  return {
+    ...item,
+    kabupaten: kabupatenById.get(item.kabupaten_id),
+    category: item.category_id ? categoryById.get(item.category_id) : undefined,
+  };
+}
 
-  // Fetch item counts for each kabupaten
-  const kabupatensWithCounts = await Promise.all(
-    (data || []).map(async (kab: Kabupaten) => {
-      const { count } = await supabase
-        .from('budaya_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('kabupaten_id', kab.id)
-        .eq('status', 'published');
-      
-      return {
-        ...kab,
-        item_count: count || 0,
-      };
-    })
+function sortBudayaItems(
+  items: BudayaItemWithRelations[],
+  orderBy: NonNullable<GetBudayaItemsParams["order_by"]>,
+  direction: NonNullable<GetBudayaItemsParams["order_direction"]>,
+): BudayaItemWithRelations[] {
+  const factor = direction === "asc" ? 1 : -1;
+
+  return [...items].sort((a, b) => {
+    if (orderBy === "name") {
+      return a.name.localeCompare(b.name, "id") * factor;
+    }
+
+    const numericA =
+      orderBy === "created_at"
+        ? new Date(a.created_at).getTime()
+        : orderBy === "rating"
+          ? a.rating
+          : orderBy === "reviews_count"
+            ? a.reviews_count
+            : a.view_count;
+
+    const numericB =
+      orderBy === "created_at"
+        ? new Date(b.created_at).getTime()
+        : orderBy === "rating"
+          ? b.rating
+          : orderBy === "reviews_count"
+            ? b.reviews_count
+            : b.view_count;
+
+    return (numericA - numericB) * factor;
+  });
+}
+
+export async function getKabupatens(
+  includeItemCount = false,
+): Promise<KabupatenWithItems[]> {
+  const sortedKabupatens = [...dataset.kabupatens].sort((a, b) =>
+    a.name.localeCompare(b.name, "id"),
   );
 
-  return kabupatensWithCounts;
-}
-
-/**
- * Get kabupaten by slug
- */
-export async function getKabupatenBySlug(slug: string): Promise<Kabupaten | null> {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('kabupatens')
-    .select('*')
-    .eq('slug', slug)
-    .single();
-
-  if (error) {
-    console.error('Error fetching kabupaten:', error);
-    return null;
+  if (!includeItemCount) {
+    return sortedKabupatens;
   }
 
-  return data;
+  const publishedItemCounts = dataset.items.reduce<Record<string, number>>(
+    (acc, item) => {
+      if (item.status !== "published") {
+        return acc;
+      }
+
+      acc[item.kabupaten_id] = (acc[item.kabupaten_id] || 0) + 1;
+
+      return acc;
+    },
+    {},
+  );
+
+  return sortedKabupatens.map((kabupaten) => ({
+    ...kabupaten,
+    item_count: publishedItemCounts[kabupaten.id] || 0,
+  }));
 }
 
-/**
- * Get all budaya categories
- */
+export async function getKabupatenBySlug(
+  slug: string,
+): Promise<Kabupaten | null> {
+  return (
+    dataset.kabupatens.find((kabupaten) => kabupaten.slug === slug) || null
+  );
+}
+
 export async function getBudayaCategories(): Promise<BudayaCategory[]> {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('budaya_categories')
-    .select('*')
-    .order('name');
-
-  if (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
-
-  return data || [];
+  return [...dataset.categories].sort((a, b) =>
+    a.name.localeCompare(b.name, "id"),
+  );
 }
 
-/**
- * Get budaya items with filtering, search, and pagination
- */
 export async function getBudayaItems(
-  params: GetBudayaItemsParams = {}
+  params: GetBudayaItemsParams = {},
 ): Promise<GetBudayaItemsResponse> {
-  const supabase = await createClient();
-  
   const {
     kabupaten_slug,
     category_slug,
     type,
     search,
     featured,
-    status = 'published',
+    status = "published",
     limit = 20,
     offset = 0,
-    order_by = 'rating',
-    order_direction = 'desc',
+    order_by = "rating",
+    order_direction = "desc",
   } = params;
 
-  // Build query
-  let query = supabase
-    .from('budaya_items')
-    .select(`
-      *,
-      kabupaten:kabupatens(*),
-      category:budaya_categories(*)
-    `, { count: 'exact' })
-    .eq('status', status);
+  const normalizedSearch = search?.trim().toLowerCase();
+  const kabupaten = kabupaten_slug
+    ? dataset.kabupatens.find((item) => item.slug === kabupaten_slug)
+    : undefined;
+  const category = category_slug
+    ? dataset.categories.find((item) => item.slug === category_slug)
+    : undefined;
 
-  // Apply filters
-  if (kabupaten_slug) {
-    const kabupaten = await getKabupatenBySlug(kabupaten_slug);
-    if (kabupaten) {
-      query = query.eq('kabupaten_id', kabupaten.id);
+  const filteredItems = dataset.items.filter((item) => {
+    if (item.status !== status) {
+      return false;
     }
-  }
 
-  if (category_slug) {
-    const { data: category } = await supabase
-      .from('budaya_categories')
-      .select('id')
-      .eq('slug', category_slug)
-      .single();
-    
-    if (category) {
-      query = query.eq('category_id', category.id);
+    if (kabupaten_slug && (!kabupaten || item.kabupaten_id !== kabupaten.id)) {
+      return false;
     }
-  }
 
-  if (type) {
-    query = query.eq('type', type);
-  }
+    if (category_slug && (!category || item.category_id !== category.id)) {
+      return false;
+    }
 
-  if (featured !== undefined) {
-    query = query.eq('featured', featured);
-  }
+    if (type && item.type !== type) {
+      return false;
+    }
 
-  if (search) {
-    query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%,tags.cs.{${search}}`);
-  }
+    if (featured !== undefined && item.featured !== featured) {
+      return false;
+    }
 
-  // Apply ordering
-  query = query.order(order_by, { ascending: order_direction === 'asc' });
+    if (normalizedSearch) {
+      const searchable = [
+        item.name,
+        item.description || "",
+        ...(item.tags || []),
+      ]
+        .join(" ")
+        .toLowerCase();
 
-  // Apply pagination
-  query = query.range(offset, offset + limit - 1);
+      return searchable.includes(normalizedSearch);
+    }
 
-  const { data, error, count } = await query;
+    return true;
+  });
 
-  if (error) {
-    console.error('Error fetching budaya items:', error);
-    throw error;
-  }
+  const withRelations = filteredItems.map(mapBudayaItemWithRelations);
+  const sortedItems = sortBudayaItems(withRelations, order_by, order_direction);
+  const paginatedItems = sortedItems.slice(offset, offset + limit);
 
   return {
-    items: (data || []) as BudayaItemWithRelations[],
-    total: count || 0,
+    items: paginatedItems,
+    total: sortedItems.length,
     limit,
     offset,
   };
 }
 
-/**
- * Get single budaya item by slug with all relations
- */
-export async function getBudayaItemBySlug(slug: string): Promise<BudayaItemWithRelations | null> {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('budaya_items')
-    .select(`
-      *,
-      kabupaten:kabupatens(*),
-      category:budaya_categories(*),
-      images:budaya_images(*),
-      recent_reviews:budaya_reviews(*)
-    `)
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .order('display_order', { foreignTable: 'budaya_images' })
-    .order('created_at', { foreignTable: 'budaya_reviews', ascending: false })
-    .limit(5, { foreignTable: 'budaya_reviews' })
-    .single();
+export async function getBudayaItemBySlug(
+  slug: string,
+): Promise<BudayaItemWithRelations | null> {
+  const item = dataset.items.find(
+    (budayaItem) =>
+      budayaItem.slug === slug && budayaItem.status === "published",
+  );
 
-  if (error) {
-    console.error('Error fetching budaya item:', error);
+  if (!item) {
     return null;
   }
 
-  // Increment view count (fire and forget)
-  supabase.rpc('increment_budaya_item_views', { item_id: data.id }).then();
+  const images = dataset.images
+    .filter((image) => image.budaya_item_id === item.id)
+    .sort((a, b) => a.display_order - b.display_order);
+  const recentReviews = dataset.reviews
+    .filter(
+      (review) =>
+        review.budaya_item_id === item.id && review.status === "approved",
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    )
+    .slice(0, 5);
 
-  return data as BudayaItemWithRelations;
+  return {
+    ...mapBudayaItemWithRelations(item),
+    view_count: item.view_count + 1,
+    images,
+    recent_reviews: recentReviews,
+  };
 }
 
-/**
- * Get featured budaya items
- */
-export async function getFeaturedBudayaItems(limit = 6): Promise<BudayaItemWithRelations[]> {
+export async function getFeaturedBudayaItems(
+  limit = 6,
+): Promise<BudayaItemWithRelations[]> {
   const { items } = await getBudayaItems({
     featured: true,
     limit,
-    order_by: 'rating',
-    order_direction: 'desc',
+    order_by: "rating",
+    order_direction: "desc",
   });
-  
+
   return items;
 }
 
-/**
- * Create a review for a budaya item
- */
-export async function createBudayaReview(params: CreateReviewParams): Promise<boolean> {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from('budaya_reviews')
-    .insert({
-      budaya_item_id: params.budaya_item_id,
-      user_name: params.user_name,
-      rating: params.rating,
-      comment: params.comment,
-      visit_date: params.visit_date,
-      status: 'pending', // Reviews need approval
-    });
+export async function createBudayaReview(
+  params: CreateReviewParams,
+): Promise<boolean> {
+  const itemExists = dataset.items.some(
+    (item) => item.id === params.budaya_item_id && item.status === "published",
+  );
 
-  if (error) {
-    console.error('Error creating review:', error);
+  if (!itemExists) {
+    return false;
+  }
+
+  if (params.rating < 1 || params.rating > 5) {
+    return false;
+  }
+
+  if (!params.user_name.trim()) {
     return false;
   }
 
   return true;
 }
 
-/**
- * Get budaya statistics
- */
 export async function getBudayaStats(): Promise<BudayaStats | null> {
-  const supabase = await createClient();
-  
-  try {
-    // Total items
-    const { count: totalItems } = await supabase
-      .from('budaya_items')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'published');
+  const publishedItems = dataset.items.filter(
+    (item) => item.status === "published",
+  );
+  const approvedReviews = dataset.reviews.filter(
+    (review) => review.status === "approved",
+  );
 
-    // Total kabupatens
-    const { count: totalKabupatens } = await supabase
-      .from('kabupatens')
-      .select('*', { count: 'exact', head: true });
-
-    // Total reviews
-    const { count: totalReviews } = await supabase
-      .from('budaya_reviews')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved');
-
-    // Average rating
-    const { data: avgData } = await supabase
-      .from('budaya_items')
-      .select('rating')
-      .eq('status', 'published');
-    
-    const averageRating = avgData && avgData.length > 0
-      ? avgData.reduce((sum: number, item: { rating: number }) => sum + item.rating, 0) / avgData.length
+  const averageRating =
+    publishedItems.length > 0
+      ? publishedItems.reduce((sum, item) => sum + item.rating, 0) /
+        publishedItems.length
       : 0;
 
-    // Items by type
-    const { data: typeData } = await supabase
-      .from('budaya_items')
-      .select('type')
-      .eq('status', 'published');
-    
-    const itemsByType = {
-      objek: typeData?.filter((item: { type: string }) => item.type === 'objek').length || 0,
-      tradisi: typeData?.filter((item: { type: string }) => item.type === 'tradisi').length || 0,
-      kuliner: typeData?.filter((item: { type: string }) => item.type === 'kuliner').length || 0,
-    };
+  const itemsByType = {
+    objek: publishedItems.filter((item) => item.type === "objek").length,
+    tradisi: publishedItems.filter((item) => item.type === "tradisi").length,
+    kuliner: publishedItems.filter((item) => item.type === "kuliner").length,
+  };
 
-    // Items by kabupaten
-    const { data: kabupatenData } = await supabase
-      .from('budaya_items')
-      .select(`
-        kabupaten:kabupatens(name)
-      `)
-      .eq('status', 'published');
-    
-    const kabupatenCounts = kabupatenData?.reduce((acc: any, item: any) => {
-      const name = item.kabupaten?.name;
-      if (name) {
-        acc[name] = (acc[name] || 0) + 1;
+  const kabupatenCounts = publishedItems.reduce<Record<string, number>>(
+    (acc, item) => {
+      const kabupatenName = kabupatenById.get(item.kabupaten_id)?.name;
+
+      if (!kabupatenName) {
+        return acc;
       }
+
+      acc[kabupatenName] = (acc[kabupatenName] || 0) + 1;
+
       return acc;
-    }, {});
+    },
+    {},
+  );
 
-    const itemsByKabupaten = Object.entries(kabupatenCounts || {}).map(([name, count]) => ({
-      kabupaten_name: name,
-      count: count as number,
-    }));
+  const itemsByKabupaten = Object.entries(kabupatenCounts)
+    .map(([kabupaten_name, count]) => ({ kabupaten_name, count }))
+    .sort((a, b) => b.count - a.count);
 
-    return {
-      total_items: totalItems || 0,
-      total_kabupatens: totalKabupatens || 0,
-      total_reviews: totalReviews || 0,
-      average_rating: parseFloat(averageRating.toFixed(1)),
-      items_by_type: itemsByType,
-      items_by_kabupaten: itemsByKabupaten,
-    };
-  } catch (error) {
-    console.error('Error fetching budaya stats:', error);
-    return null;
-  }
+  return {
+    total_items: publishedItems.length,
+    total_kabupatens: dataset.kabupatens.length,
+    total_reviews: approvedReviews.length,
+    average_rating: Number(averageRating.toFixed(1)),
+    items_by_type: itemsByType,
+    items_by_kabupaten: itemsByKabupaten,
+  };
 }
 
-/**
- * Search budaya items by query (full-text search)
- */
-export async function searchBudayaItems(query: string, limit = 10): Promise<BudayaItemWithRelations[]> {
+export async function searchBudayaItems(
+  query: string,
+  limit = 10,
+): Promise<BudayaItemWithRelations[]> {
   const { items } = await getBudayaItems({
     search: query,
     limit,
-    order_by: 'rating',
+    order_by: "rating",
   });
-  
+
   return items;
 }

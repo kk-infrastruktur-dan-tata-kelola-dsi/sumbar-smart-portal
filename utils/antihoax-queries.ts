@@ -1,75 +1,45 @@
-import { createClient } from "@/utils/supabase/server"
+import antihoaxData from "@/data/dummy/antihoax.json";
 
 export type AntiHoax = {
-  id: string
-  judul: string
-  penjelasan: string
-  written_by: string
-  gambar_url: string | null
-  jenis: 'hoax' | 'sebagian' | 'verified'
-  created_at: string
-}
+  id: string;
+  judul: string;
+  penjelasan: string;
+  written_by: string;
+  gambar_url: string | null;
+  jenis: "hoax" | "sebagian" | "verified";
+  created_at: string;
+};
+
+const antiHoaxItems = antihoaxData as AntiHoax[];
 
 export async function getAntiHoax(jenis?: string): Promise<AntiHoax[]> {
-  const supabase = await createClient()
+  const normalizedJenis = jenis?.toLowerCase();
 
-  let query = supabase
-    .from("antihoax")
-    .select("*")
-    .order("created_at", { ascending: false })
-
-  if (jenis) {
-    query = query.eq("jenis", jenis)
-  }
-
-  const { data, error } = await query
-
-  if (error) {
-    console.error("Error fetching antihoax:", error)
-    throw error
-  }
-
-  return data || []
+  return antiHoaxItems
+    .filter((item) => !normalizedJenis || item.jenis === normalizedJenis)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
 }
 
 export async function getAntiHoaxById(id: string): Promise<AntiHoax | null> {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from("antihoax")
-    .select("*")
-    .eq("id", id)
-    .single()
-
-  if (error) {
-    console.error("Error fetching antihoax by ID:", error)
-    return null
-  }
-
-  return data
+  return antiHoaxItems.find((item) => item.id === id) || null;
 }
 
 export async function getAntiHoaxByJenis(): Promise<{
-  hoax: AntiHoax[]
-  verified: AntiHoax[]
+  hoax: AntiHoax[];
+  verified: AntiHoax[];
 }> {
-  const supabase = await createClient()
-
-  const [hoaxResult, verifiedResult] = await Promise.all([
-    supabase
-      .from("antihoax")
-      .select("*")
-      .in("jenis", ["hoax", "sebagian"])
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("antihoax")
-      .select("*")
-      .eq("jenis", "verified")
-      .order("created_at", { ascending: false })
-  ])
+  const sortedItems = [...antiHoaxItems].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
 
   return {
-    hoax: hoaxResult.data || [],
-    verified: verifiedResult.data || []
-  }
+    hoax: sortedItems.filter(
+      (item) => item.jenis === "hoax" || item.jenis === "sebagian",
+    ),
+    verified: sortedItems.filter((item) => item.jenis === "verified"),
+  };
 }
