@@ -1,590 +1,396 @@
-"use client";
+import {
+  ArrowRight,
+  Building2,
+  CalendarDays,
+  FileText,
+  HelpCircle,
+  Landmark,
+  Map,
+  Megaphone,
+  Newspaper,
+  Search,
+  ShieldAlert,
+  WalletCards,
+} from "lucide-react";
+import Link from "next/link";
 
-import React from "react";
-import { Button } from "@heroui/button";
-import { Skeleton } from "@heroui/skeleton";
-import Image from "next/image";
-import LayananCarousel from "@/components/LayananCarousel";
+import { ImmersiveMedia, RumahGadangHeroArt } from "@/components/landing";
+import {
+  ActionCard,
+  DocumentCard,
+  PageShell,
+  Section,
+  StatusBadge,
+} from "@/components/ui";
+
+const priorityServices = [
+  {
+    title: "Pengumuman resmi",
+    description: "Cek informasi dan keputusan terbaru dari Pemprov Sumbar.",
+    href: "/pengumuman",
+    icon: <Megaphone className="h-5 w-5" />,
+    status: "Resmi",
+  },
+  {
+    title: "PPID dan informasi publik",
+    description: "Akses pedoman, dokumen, dan kanal informasi publik.",
+    href: "/informasi#pedoman-teknis",
+    icon: <FileText className="h-5 w-5" />,
+    status: "Dokumen",
+  },
+  {
+    title: "Keuangan daerah",
+    description: "Lihat ringkasan APBD, realisasi, dan laporan daerah.",
+    href: "/keuangan",
+    icon: <WalletCards className="h-5 w-5" />,
+    status: "Transparansi",
+  },
+  {
+    title: "Anti Hoax",
+    description: "Klarifikasi informasi sebelum dibagikan ke publik.",
+    href: "/anti_hoax",
+    icon: <ShieldAlert className="h-5 w-5" />,
+    status: "Waspada",
+    statusVariant: "urgent" as const,
+  },
+  {
+    title: "Survey kepuasan masyarakat",
+    description: "Nilai layanan dan baca panduan penggunaan sistem SKM.",
+    href: "/informasi-layanan",
+    icon: <HelpCircle className="h-5 w-5" />,
+    status: "Layanan",
+  },
+  {
+    title: "Direktori OPD",
+    description: "Temukan perangkat daerah dan kategori organisasi provinsi.",
+    href: "/opd",
+    icon: <Building2 className="h-5 w-5" />,
+    status: "Direktori",
+  },
+];
+
+const officialUpdates = [
+  {
+    title: "Pengumuman Seleksi CPNS Provinsi Sumbar 2024",
+    date: "1 November 2024",
+    href: "/pengumuman",
+    label: "Pengumuman",
+  },
+  {
+    title: "Pembukaan Pendaftaran Beasiswa Sumbar Cerdas",
+    date: "3 November 2024",
+    href: "/pengumuman",
+    label: "Pengumuman",
+  },
+  {
+    title: "Jadwal Pemeliharaan Sistem Informasi",
+    date: "5 November 2024",
+    href: "/pengumuman",
+    label: "Informasi",
+  },
+];
+
+const newsItems = [
+  {
+    title: "Gubernur Sumbar resmikan program digitalisasi pelayanan publik",
+    source: "Humas Pemprov Sumbar",
+    date: "28 Oktober 2024",
+    href: "/informasi/berita",
+  },
+  {
+    title: "Sumbar raih penghargaan pengelolaan keuangan daerah",
+    source: "Biro Keuangan",
+    date: "25 Oktober 2024",
+    href: "/informasi/berita",
+  },
+];
+
+const cultureLinks = [
+  { label: "Budaya Sumbar", href: "/budaya", icon: <Map className="h-4 w-4" /> },
+  {
+    label: "Foto daerah",
+    href: "/informasi/foto",
+    icon: <Newspaper className="h-4 w-4" />,
+  },
+  {
+    label: "Agenda kegiatan",
+    href: "/informasi/agenda",
+    icon: <CalendarDays className="h-4 w-4" />,
+  },
+];
 
 export default function Home() {
-  const [loading, setLoading] = React.useState(true);
+  return (
+    <PageShell width="wide" className="bg-civic-paper" innerClassName="py-0!">
+      <section className="relative left-1/2 isolate min-h-[calc(92dvh-4rem)] w-screen -translate-x-1/2 overflow-hidden bg-civic-paper">
+        <RumahGadangHeroArt />
+        <div className="absolute inset-x-0 bottom-0 z-[1] h-40 bg-gradient-to-t from-civic-paper via-civic-paper/92 to-transparent" />
+        <div className="relative z-10 mx-auto flex min-h-[calc(92dvh-4rem)] max-w-civic-wide items-center px-6 pb-24 pt-16 sm:px-8 lg:px-10">
+          <div className="max-w-3xl landing-reveal lg:max-w-[46rem]">
+            <StatusBadge variant="official">Portal resmi Provinsi Sumatera Barat</StatusBadge>
+            <h1 className="mt-5 max-w-4xl text-balance text-4xl font-extrabold leading-[1.04] text-civic-text md:text-6xl">
+              Akses layanan dan informasi publik Sumatera Barat
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-civic-textMuted">
+              Temukan layanan, pengumuman, dokumen transparansi, klarifikasi
+              informasi, dan data perangkat daerah dalam satu pintu.
+            </p>
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
+            <form
+              action="/informasi"
+              className="mt-8 flex max-w-2xl flex-col gap-3 rounded-civic-xl border border-civic-line bg-civic-cloud/96 p-2 shadow-civic-sm sm:flex-row"
+            >
+              <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
+                <Search className="h-5 w-5 shrink-0 text-civic-textSubtle" />
+                <span className="sr-only">Cari layanan atau informasi</span>
+                <input
+                  name="q"
+                  type="search"
+                  placeholder="Cari layanan, pengumuman, dokumen..."
+                  className="w-full bg-transparent py-3 text-sm text-civic-text outline-none placeholder:text-civic-textSubtle"
+                />
+              </label>
+              <button
+                type="submit"
+                className="civic-focus-ring inline-flex items-center justify-center gap-2 rounded-civic-lg bg-semantic-primary px-5 py-3 text-sm font-bold text-white transition duration-civic hover:bg-brand-gold-600"
+              >
+                Cari <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
 
-  if (loading) {
-    return (
-      <div className="bg-white min-h-screen">
-        {/* Hero Skeleton */}
-        <section className="relative max-w-5xl mx-auto mt-8">
-          <Skeleton className="w-full h-[420px] rounded-t-xl" />
-        </section>
-
-        {/* Stats Skeleton */}
-        <section className="max-w-5xl mx-auto flex relative -mt-12 z-30 px-4">
-          <div className="flex w-full shadow-xl rounded-t-[32px] overflow-hidden">
-            <div className="bg-white px-10 py-7 flex-1 border-r border-gray-100">
-              <Skeleton className="h-4 w-24 mb-2" />
-              <Skeleton className="h-8 w-32" />
-            </div>
-            <div className="bg-white px-10 py-7 flex-1">
-              <Skeleton className="h-4 w-24 mb-2 ml-auto" />
-              <Skeleton className="h-8 w-16 ml-auto" />
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link
+                href="/pengumuman"
+                className="civic-focus-ring rounded-civic border border-civic-line bg-civic-cloud/96 px-4 py-2 text-sm font-semibold text-civic-text hover:border-brand-gold-300 hover:bg-brand-gold-50"
+              >
+                Pengumuman resmi
+              </Link>
+              <Link
+                href="/keuangan"
+                className="civic-focus-ring rounded-civic border border-civic-line bg-civic-cloud/96 px-4 py-2 text-sm font-semibold text-civic-text hover:border-brand-gold-300 hover:bg-brand-gold-50"
+              >
+                Keuangan daerah
+              </Link>
+              <Link
+                href="/anti_hoax"
+                className="civic-focus-ring rounded-civic border border-brand-gold-300 bg-brand-gold-50 px-4 py-2 text-sm font-bold text-brand-gold-800 hover:bg-brand-gold-100"
+              >
+                Anti Hoax
+              </Link>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Video Section Skeleton */}
-        <section className="bg-yellow-400 py-16 mt-16">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex gap-8">
-              <div className="md:w-1/3">
-                <Skeleton className="h-8 w-48 mb-4" />
-                <Skeleton className="h-16 w-full" />
-              </div>
-              <div className="md:w-2/3 grid grid-cols-2 gap-8">
-                {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-64 rounded-xl" />
-                ))}
-              </div>
-            </div>
+      <section className="sumbar-grain relative left-1/2 -mt-14 min-h-[74vh] w-screen -translate-x-1/2 overflow-hidden pb-16 pt-28 text-civic-inverse md:pb-20 md:pt-32">
+        <ImmersiveMedia
+          image="green-valley"
+          imgClassName="max-md:[object-position:52%_center] md:[object-position:center_center]"
+          priority
+        />
+        <div className="absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(248,245,237,0.94)_0%,rgba(23,35,49,0.92)_20%,rgba(23,35,49,0.88)_60%,rgba(23,35,49,0.82)_100%)]" />
+        <div className="absolute inset-x-0 top-0 z-[2] h-32 bg-gradient-to-b from-civic-paper via-civic-paper/60 to-transparent" />
+        <div className="relative z-10 mx-auto max-w-civic-wide px-6 sm:px-8 lg:px-10">
+          <div className="mb-8 max-w-civic-prose landing-reveal">
+            <h2 className="text-2xl font-extrabold leading-tight tracking-[-0.01em] text-civic-inverse md:text-3xl">
+              Layanan prioritas
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#B8C0CB] md:text-base">
+              Akses yang paling sering dibutuhkan warga ditempatkan di depan, dengan rute langsung dan label yang jelas.
+            </p>
           </div>
-        </section>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {priorityServices.map((service) => (
+              <ActionCard
+                key={service.href}
+                title={service.title}
+                description={service.description}
+                href={service.href}
+                icon={service.icon}
+                status={service.status}
+                statusVariant={service.statusVariant ?? "official"}
+                actionLabel="Buka"
+                className="bg-civic-cloud/98 shadow-[0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-sm"
+              />
+            ))}
+          </div>
+        </div>
+      </section>
 
-        {/* News Section Skeleton */}
-        <section className="bg-white py-16">
-          <div className="max-w-6xl mx-auto px-4">
-            <Skeleton className="h-10 w-64 mx-auto mb-8" />
-            <div className="grid grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-96 rounded-xl" />
+      <Section
+        title="Informasi resmi"
+        description="Pengumuman dan berita ditampilkan sebagai jalur resmi, bukan kartu promosi."
+        className="py-6"
+      >
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="flex flex-col rounded-civic-xl border border-civic-line bg-civic-cloud p-5 shadow-civic-xs">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-semantic-primary">
+                  Pengumuman
+                </p>
+                <h3 className="mt-1 text-xl font-bold text-civic-text">
+                  Kabar resmi terbaru
+                </h3>
+              </div>
+              <Link
+                href="/pengumuman"
+                className="civic-focus-ring rounded-civic px-2 py-1 text-sm font-bold text-semantic-primary hover:bg-brand-gold-50"
+              >
+                Lihat semua
+              </Link>
+            </div>
+            <div className="flex flex-1 flex-col gap-3">
+              {officialUpdates.map((item) => (
+                <Link
+                  href={item.href}
+                  key={item.title}
+                  className="civic-focus-ring flex flex-1 flex-col justify-center rounded-civic-lg border border-civic-line bg-civic-paper p-4 transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="font-bold leading-snug text-civic-text">
+                      {item.title}
+                    </h4>
+                    <StatusBadge variant="official">{item.label}</StatusBadge>
+                  </div>
+                  <p className="mt-2 text-sm text-civic-textSubtle">{item.date}</p>
+                </Link>
               ))}
             </div>
           </div>
-        </section>
-      </div>
-    );
-  }
 
-  return (
-    <div className="bg-white min-h-screen">
-      {/* Hero Section */}
-      <section className="relative max-w-5xl mx-auto mt-8 rounded-t-xl">
-      {/* Overlay */}
-      <div className="absolute inset-0 left-1/2 -translate-x-1/2 rounded-t-xl bg-yellow-400 z-0 w-[105%] rotate-[1deg]"/>
-
-
-      {/* Background Image */}
-      <Image
-        src="/images/gunung.png"
-        alt="Gunung Sumatera Barat"
-        width={1300}
-        height={800}
-        className="w-full h-[420px] object-cover rotate-[-1deg] relative z-10"
-        priority
-      />
-
-      {/* Ornamen Daun */}
-      <Image
-        src="/images/daun.png"
-        alt="Daun"
-        width={80}
-        height={80}
-        className="absolute left-0 bottom-0 z-20"
-      />
-      <Image
-        src="/images/daun.png"
-        alt="Daun"
-        width={60}
-        height={60}
-        className="absolute right-10 top-20 z-20"
-      />
-      <Image
-        src="/images/daun.png"
-        alt="Daun"
-        width={100}
-        height={100}
-        className="absolute right-0 bottom-0 z-20"
-      />
-
-      {/* Content */}
-      <div className="absolute bottom-12 left-12 right-12 flex flex-col items-start z-30">
-        <div className="flex gap-3 mb-5">
-          <button className="bg-yellow-400 text-white font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-yellow-500 transition-all flex items-center gap-2">
-            Jelajahi Layanan <span className="font-bold">→</span>
-          </button>
-          <button className="bg-white text-gray-900 font-semibold text-sm px-5 py-2.5 rounded-full shadow-lg hover:bg-gray-100 transition-all">
-            Pelajari Lebih Lanjut
-          </button>
-        </div>
-        <p className="text-white text-sm leading-relaxed max-w-lg drop-shadow-md">
-          Portal digital yang menghubungkan pemerintah dan masyarakat. Akses layanan publik,
-          informasi terkini, dan berpartisipasi dalam pembangunan daerah.
-        </p>
-      </div>
-    </section>
-
-
-      {/* Statistik Section */}
-      <section className="max-w-5xl mx-auto flex relative -mt-12 z-30 px-4">
-        <div className="flex w-full border border-gray-200 shadow-sm rounded-t-[32px] overflow-hidden">
-          <div className="bg-white px-10 py-7 flex-1 border-r border-gray-100">
-            <div className="text-sm font-semibold text-gray-800 mb-1.5 text-left tracking-wide">
-              Penduduk
-            </div>
-            <div className="text-3xl font-bold text-orange-500 text-left">
-              5.5M+
-            </div>
-          </div>
-          <div className="bg-white px-10 py-7 flex-1">
-            <div className="text-sm font-semibold text-gray-800 mb-1.5 text-right tracking-wide">
-              Kab/Kota
-            </div>
-            <div className="text-3xl font-bold text-orange-500 text-right">19</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Video Dokumentasi Section */}
-      <section className="bg-yellow-400 py-16">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8 px-4">
-          {/* Kiri: Judul & Deskripsi */}
-          <div className="md:w-1/3 mb-8 md:mb-0 flex flex-col justify-start md:pl-0">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Video Dokumentasi
-            </h2>
-            <p className="text-gray-800 text-base">
-              Video dokumentasi kegiatan dan informasi Pemerintah Provinsi
-              Sumatera Barat
-            </p>
-          </div>
-          {/* Kanan: Timeline & Cards */}
-          <div className="md:w-2/3 relative flex">
-            {/* Timeline Vertical */}
-            <div className="absolute left-1/2 -translate-x-1/2 h-full w-2 flex flex-col items-center z-0">
-              <div className="w-6 h-6 bg-black rounded-full mb-2" />
-              <div className="flex-1 w-2 bg-black" />
-              <div className="w-6 h-6 bg-black rounded-full mt-2" />
-            </div>
-            {/* Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full z-10" style={{ gridAutoRows: 'max-content' }}>
-              {/* Card 1 */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden self-start">
-                <div className="relative aspect-video">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/CVPhqts7ZXA"
-                    
-                    title="Profil Provinsi Sumatera Barat 2024"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full rounded-t-xl"
-                  ></iframe>
-                  <span className="absolute top-3 left-3 bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    Profil
-                  </span>
-                  <span className="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded">
-                    05:30
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="font-bold text-gray-900 mb-1">
-                    Profil Provinsi Sumatera Barat 2024
-                  </div>
-                  <div className="text-sm text-gray-600 mb-2">
-                    Gambaran umum potensi dan pembangunan Sumbar
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>125K</span>
-                    <span>28 Okt 2024</span>
-                  </div>
-                </div>
-              </div>
-              {/* Card 2 */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden mt-16">
-                <div className="relative aspect-video">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/s7cB7joWf7I"
-                    title="Upacara Hari Jadi Provinsi Sumatera Barat ke-74"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full rounded-t-xl"
-                  ></iframe>
-                  <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    Kegiatan
-                  </span>
-                  <span className="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded">
-                    12:45
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="font-bold text-gray-900 mb-1">
-                    Upacara Hari Jadi Provinsi Sumatera Barat ke-74
-                  </div>
-                  <div className="text-sm text-gray-600 mb-2">
-                    Peringatan HUT Provinsi Sumbar tahun 2024
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>89K</span>
-                    <span>25 Okt 2024</span>
-                  </div>
-                </div>
-              </div>
-              {/* Card 3 */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden self-start">
-                <div className="relative aspect-video">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/cG-vZg1SrZI"
-                    title="Digitalisasi Pelayanan Publik Sumbar"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full rounded-t-xl"
-                  ></iframe>
-                  <span className="absolute top-3 left-3 bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    Inovasi
-                  </span>
-                  <span className="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded">
-                    08:20
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="font-bold text-gray-900 mb-1">
-                    Digitalisasi Pelayanan Publik Sumbar
-                  </div>
-                  <div className="text-sm text-gray-600 mb-2">
-                    Transformasi digital layanan pemerintahan
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>67K</span>
-                    <span>22 Okt 2024</span>
-                  </div>
-                </div>
-              </div>
-              {/* Card 4 */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden mt-16">
-                <div className="relative aspect-video">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src="https://www.youtube.com/embed/xIKrWBqiS-c"
-                    title="Tatanan Normal Baru Pariwisata Sumatera Barat"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full rounded-t-xl"
-                  ></iframe>
-                  <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    Pariwisata
-                  </span>
-                  <span className="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded">
-                    10:45
-                  </span>
-                </div>
-                <div className="p-4">
-                  <div className="font-bold text-gray-900 mb-1">
-                    Tatanan Normal Baru Pariwisata Sumatera Barat
-                  </div>
-                  <div className="text-sm text-gray-600 mb-2">
-                    Edukasi dan Sosialisasi Protokol Kesehatan Pariwisata Sumbar 2024
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>79K</span>
-                    <span>25 Okt 2024</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Berita Terkini & Pengumuman Section */}
-      <section className="bg-white py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          {/* Judul & Deskripsi Tengah */}
-          <div className="mb-10">
-            <h2 className="text-3xl font-bold text-center mb-2 text-gray-900">
-              Berita Terkini
-            </h2>
-            <p className="text-center text-gray-500">
-              Kabar terbaru seputar pembangunan dan pemerintahan Provinsi Sumatera
-              Barat
-            </p>
-          </div>
-          <div className="flex flex-col md:flex-row gap-8">
-            {/* Berita Terkini */}
-            <div className="md:w-2/3 flex flex-col gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Card Berita 1 */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
-                  <div className="relative">
-                    <img
-                      src="images/placeholder-horizontal.jpg"
-                      alt="Berita 1"
-                      className="w-full h-44 object-cover"
-                    />
-                    <span className="absolute top-3 left-3 bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      Inovasi
-                    </span>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col">
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-2">
-                      <span className="flex items-center gap-1">
-                        <svg
-                          width="16"
-                          height="16"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <rect
-                            x="3"
-                            y="4"
-                            width="18"
-                            height="18"
-                            rx="4"
-                            fill="#FBBF24"
-                          />
-                          <path
-                            d="M8 11h8M12 15V7"
-                            stroke="#fff"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                        28 Oktober 2024
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <svg
-                          width="16"
-                          height="16"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle cx="12" cy="8" r="4" fill="#FBBF24" />
-                          <path
-                            d="M12 12v4m0 0h4m-4 0H8"
-                            stroke="#fff"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                        Humas Pemprov Sumbar
-                      </span>
-                    </div>
-                    <div className="font-bold text-gray-900 mb-1">
-                      Gubernur Sumbar Resmikan Program Digitalisasi Pelayanan Publik
-                    </div>
-                    <div className="text-sm text-gray-600 mb-4">
-                      Pemprov Sumbar meluncurkan sistem pelayanan publik berbasis
-                      digital untuk meningkatkan kualitas layanan kepada masyarakat.
-                    </div>
-                    <a
-                      href="#"
-                      className="text-red-600 font-bold text-sm mt-auto flex items-center gap-1"
-                    >
-                      Baca Selengkapnya <span>→</span>
-                    </a>
-                  </div>
-                </div>
-                {/* Card Berita 2 */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
-                  <div className="relative">
-                    <img
-                      src="images/placeholder-horizontal.jpg"
-                      alt="Berita 2"
-                      className="w-full h-44 object-cover"
-                    />
-                    <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      Prestasi
-                    </span>
-                  </div>
-                  <div className="p-4 flex-1 flex flex-col">
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-2">
-                      <span className="flex items-center gap-1">
-                        <svg
-                          width="16"
-                          height="16"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <rect
-                            x="3"
-                            y="4"
-                            width="18"
-                            height="18"
-                            rx="4"
-                            fill="#FBBF24"
-                          />
-                          <path
-                            d="M8 11h8M12 15V7"
-                            stroke="#fff"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                        25 Oktober 2024
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <svg
-                          width="16"
-                          height="16"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle cx="12" cy="8" r="4" fill="#FBBF24" />
-                          <path
-                            d="M12 12v4m0 0h4m-4 0H8"
-                            stroke="#fff"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                        Biro Keuangan
-                      </span>
-                    </div>
-                    <div className="font-bold text-gray-900 mb-1">
-                      Sumbar Raih Penghargaan Provinsi Terbaik Pengelolaan Keuangan
-                      Daerah
-                    </div>
-                    <div className="text-sm text-gray-600 mb-4">
-                      Provinsi Sumatera Barat meraih penghargaan WTP (Wajar Tanpa
-                      Pengecualian) untuk ketujuh kalinya berturut-turut.
-                    </div>
-                    <a
-                      href="#"
-                      className="text-red-600 font-bold text-sm mt-auto flex items-center gap-1"
-                    >
-                      Baca Selengkapnya <span>→</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Pengumuman Resmi */}
-            <div className="md:w-1/3 flex flex-col gap-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-bold text-gray-900">
-                  Pengumuman Resmi
+          <div className="flex flex-col rounded-civic-xl border border-civic-line bg-civic-cloud p-5 shadow-civic-xs">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-semantic-info">
+                  Berita
+                </p>
+                <h3 className="mt-1 text-xl font-bold text-civic-text">
+                  Informasi pembangunan
                 </h3>
-                <a
-                  href="#"
-                  className="text-blue-600 text-sm font-semibold flex items-center gap-1"
-                >
-                  Lihat Semua <span>→</span>
-                </a>
               </div>
-              <div className="flex flex-col gap-4">
-                {/* Pengumuman 1 */}
-                <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 p-4 flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">
-                      Pengumuman Seleksi CPNS Provinsi Sumbar 2024
-                    </div>
-                    <div className="text-xs text-gray-500 flex items-center gap-1">
-                      <svg
-                        width="16"
-                        height="16"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <rect
-                          x="3"
-                          y="4"
-                          width="18"
-                          height="18"
-                          rx="4"
-                          fill="#FBBF24"
-                        />
-                        <path
-                          d="M8 11h8M12 15V7"
-                          stroke="#fff"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                      1 November 2024
-                    </div>
-                  </div>
-                  <span className="text-gray-400 ml-2">→</span>
-                </div>
-                {/* Pengumuman 2 */}
-                <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 p-4 flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">
-                      Pembukaan Pendaftaran Beasiswa Sumbar Cerdas
-                    </div>
-                    <div className="text-xs text-gray-500 flex items-center gap-1">
-                      <svg
-                        width="16"
-                        height="16"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <rect
-                          x="3"
-                          y="4"
-                          width="18"
-                          height="18"
-                          rx="4"
-                          fill="#FBBF24"
-                        />
-                        <path
-                          d="M8 11h8M12 15V7"
-                          stroke="#fff"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                      3 November 2024
-                    </div>
-                  </div>
-                  <span className="text-gray-400 ml-2">→</span>
-                </div>
-                {/* Pengumuman 3 */}
-                <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 p-4 flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">
-                      Jadwal Pemeliharaan Sistem Informasi
-                    </div>
-                    <div className="text-xs text-gray-500 flex items-center gap-1">
-                      <svg
-                        width="16"
-                        height="16"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <rect
-                          x="3"
-                          y="4"
-                          width="18"
-                          height="18"
-                          rx="4"
-                          fill="#3B82F6"
-                        />
-                        <path
-                          d="M8 11h8M12 15V7"
-                          stroke="#fff"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                      5 November 2024
-                    </div>
-                  </div>
-                  <span className="text-gray-400 ml-2">→</span>
-                </div>
-              </div>
+              <Link
+                href="/informasi/berita"
+                className="civic-focus-ring rounded-civic px-2 py-1 text-sm font-bold text-semantic-primary hover:bg-brand-gold-50"
+              >
+                Semua berita
+              </Link>
             </div>
+            <div className="flex flex-1 flex-col gap-3">
+              {newsItems.map((item) => (
+                <Link
+                  href={item.href}
+                  key={item.title}
+                  className="civic-focus-ring flex flex-1 flex-col justify-center rounded-civic-lg border border-civic-line bg-civic-paper p-4 transition duration-civic hover:border-brand-rantau-200 hover:bg-brand-rantau-50"
+                >
+                  <p className="text-sm font-semibold text-semantic-info">
+                    {item.source}
+                  </p>
+                  <h4 className="mt-2 text-lg font-bold leading-snug text-civic-text">
+                    {item.title}
+                  </h4>
+                  <p className="mt-2 text-sm text-civic-textSubtle">{item.date}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <section className="relative left-1/2 min-h-[78vh] w-screen -translate-x-1/2 overflow-hidden bg-civic-paper py-16 md:py-20">
+        <ImmersiveMedia
+          image="rice-terraces"
+          className="opacity-80"
+          imgClassName="max-md:[object-position:64%_center] md:[object-position:58%_center]"
+        />
+        <div className="absolute inset-0 z-[1] bg-[linear-gradient(90deg,rgba(248,245,237,0.98)_0%,rgba(248,245,237,0.94)_40%,rgba(248,245,237,0.52)_68%,rgba(248,245,237,0.22)_100%)]" />
+        <div className="absolute inset-x-0 top-0 z-[2] h-28 bg-gradient-to-b from-civic-paper via-civic-paper/72 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 z-[2] h-24 bg-gradient-to-t from-civic-paper via-civic-paper/55 to-transparent" />
+        <div className="relative z-10 mx-auto max-w-civic-wide px-6 sm:px-8 lg:px-10">
+          <div className="max-w-civic-prose landing-reveal">
+            <h2 className="text-2xl font-extrabold leading-tight tracking-[-0.01em] text-civic-text md:text-3xl">
+              Transparansi dan dokumen
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#6B7280] md:text-base">
+              Akses dokumen dan laporan penting dengan konteks sumber yang jelas.
+            </p>
+          </div>
+          <div className="mt-8 grid max-w-5xl gap-4 lg:grid-cols-3">
+            <DocumentCard
+              title="Keuangan Daerah"
+              description="Ringkasan APBD, realisasi, laporan, dan tren anggaran."
+              href="/keuangan"
+              fileType="Dashboard"
+              source="Pemprov Sumbar"
+              icon={<Landmark className="h-5 w-5" />}
+              actionLabel="Lihat"
+              status="Transparansi"
+              className="bg-civic-cloud/96 shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+            />
+            <DocumentCard
+              title="Pedoman teknis"
+              description="Dokumen panduan dan informasi teknis layanan publik."
+              href="/informasi#pedoman-teknis"
+              fileType="Dokumen"
+              source="Pemprov Sumbar"
+              actionLabel="Buka"
+              status="PPID"
+              className="bg-civic-cloud/96 shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+            />
+            <DocumentCard
+              title="Manual SKM"
+              description="Panduan penggunaan Survey Kepuasan Masyarakat."
+              href="/file/SEPAKAT - Manual Book.pdf"
+              fileType="PDF"
+              source="SEPAKAT"
+              actionLabel="Unduh"
+              status="Layanan"
+              className="bg-civic-cloud/96 shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+            />
           </div>
         </div>
       </section>
 
-      {/* Layanan Masyarakat Section */}
-      <LayananCarousel />
-
-    </div>
+      <section className="sumbar-grain relative left-1/2 -mt-10 min-h-[78vh] w-screen -translate-x-1/2 overflow-hidden pb-16 pt-24 text-civic-inverse md:pb-20 md:pt-28">
+        <ImmersiveMedia
+          image="mountain-road"
+          imgClassName="max-md:[object-position:42%_center] md:[object-position:center_center]"
+        />
+        <div className="absolute inset-0 z-[1] bg-[linear-gradient(90deg,rgba(23,35,49,0.94)_0%,rgba(23,35,49,0.86)_42%,rgba(23,35,49,0.54)_100%)]" />
+        <div className="absolute inset-x-0 top-0 z-[2] h-24 bg-gradient-to-b from-civic-paper via-civic-paper/20 to-transparent" />
+        <div className="relative z-10 mx-auto max-w-civic-wide px-6 sm:px-8 lg:px-10">
+          <div className="max-w-civic-prose landing-reveal">
+            <h2 className="text-2xl font-extrabold leading-tight tracking-[-0.01em] text-civic-inverse md:text-3xl">
+              Budaya dan wilayah
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#B8C0CB] md:text-base">
+              Konteks lokal ditampilkan sebagai pengetahuan daerah yang dapat dijelajahi, bukan sekadar ornamen.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {cultureLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="civic-focus-ring group rounded-civic-xl border border-white/12 bg-white/[0.08] p-6 backdrop-blur-sm transition duration-civic hover:border-brand-gold-400/40 hover:bg-white/[0.14]"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-civic-lg bg-brand-gold-500/20 text-brand-gold-300 transition duration-civic group-hover:bg-brand-gold-500/30 group-hover:text-brand-gold-200">
+                  {item.icon}
+                </span>
+                <h3 className="mt-4 text-lg font-bold text-civic-inverse">
+                  {item.label}
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-[#B8C0CB]">
+                  Jelajahi informasi lengkap
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-gold-300 transition duration-civic group-hover:text-brand-gold-200">
+                  Selengkapnya <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    </PageShell>
   );
 }

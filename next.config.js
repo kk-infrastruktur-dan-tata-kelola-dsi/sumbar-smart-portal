@@ -1,5 +1,8 @@
+const isStandalone = process.env.DOCKER_BUILD === "1";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(isStandalone ? { output: "standalone" } : {}),
   eslint: {
     ignoreDuringBuilds: true,
   },

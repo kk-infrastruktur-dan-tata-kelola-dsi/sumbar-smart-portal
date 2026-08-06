@@ -1,118 +1,41 @@
-"use client";
+import { Video } from "lucide-react";
 
-import React from "react";
-import { Skeleton } from "@heroui/skeleton";
-
-const iframeSrc = "https://www.youtube.com/embed/";
-const videos = [
-    {
-        id: "6U_Fi8FzFYQ",
-        title: "Pembangunan Infrastruktur Sumbar",
-        date: "28 Oktober 2024"
-    },
-    {
-        id: "DtxIaAY7Qto",
-        title: "Program Digitalisasi UMKM",
-        date: "25 Oktober 2024"
-    },
-    {
-        id: "nZgRsT0t9lk",
-        title: "Festival Budaya Minangkabau",
-        date: "20 Oktober 2024"
-    }
-];
+import { VideoCard } from "@/components/content";
+import { PageHeader, PageShell, Section, StatusBadge } from "@/components/ui";
+import { videos } from "@/config/content-data";
 
 export default function VideoPage() {
-    const [loading, setLoading] = React.useState(true);
+  return (
+    <PageShell as="main">
+      <PageHeader
+        eyebrow="Media publik"
+        title="Video"
+        description="Dokumentasi video kegiatan, program, dan informasi Pemerintah Provinsi Sumatera Barat."
+        metadata={
+          <>
+            <StatusBadge variant="information">{videos.length} video</StatusBadge>
+            <StatusBadge variant="official">Embed YouTube</StatusBadge>
+          </>
+        }
+      />
 
-    React.useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 800);
-
-        return () => clearTimeout(timer);
-    }, []);
-
-    if (loading) {
-        return <VideoSkeleton />;
-    }
-
-    return (
-        <div className="min-h-screen bg-white">
-            {/* Header Section */}
-            <div className="text-black">
-                <div className="container mx-auto px-4 py-16 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tighter">
-                        Video Kegiatan
-                    </h1>
-                    <p className="text-lg opacity-90 max-w-3xl mx-auto">
-                        Dokumentasi video kegiatan dan program Provinsi Sumatera Barat
-                    </p>
-                </div>
-            </div>
-
-            <div className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {videos.map((video) => (
-                        <div 
-                            key={video.id} 
-                            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
-                        >
-                            <div className="relative aspect-video w-full">
-                                <iframe
-                                    className="absolute inset-0 w-full h-full rounded-t-xl"
-                                    src={iframeSrc + video.id}
-                                    title={video.title}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                ></iframe>
-                            </div>
-                            <div className="p-4">
-                                <h3 className="font-bold text-lg mb-2">
-                                    {video.title}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-foreground-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                    </svg>
-                                    {video.date}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+      <Section
+        title="Video kegiatan"
+        description="Video disajikan dalam kartu yang konsisten dengan metadata tanggal dan sumber."
+      >
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {videos.map((video) => (
+            <VideoCard key={video.id} {...video} />
+          ))}
         </div>
-    );
-}
-
-function VideoSkeleton() {
-    return (
-        <div className="min-h-screen bg-white">
-            {/* Header Skeleton */}
-            <div className="text-black">
-                <div className="container mx-auto px-4 py-16 text-center">
-                    <Skeleton className="h-12 w-64 mx-auto rounded-lg mb-4" />
-                    <Skeleton className="h-6 w-full max-w-xl mx-auto rounded-lg" />
-                </div>
-            </div>
-
-            <div className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {[1, 2, 3].map((item) => (
-                        <div 
-                            key={item}
-                            className="bg-white rounded-xl shadow-md"
-                        >
-                            <Skeleton className="aspect-video w-full rounded-t-xl" />
-                            <div className="p-4">
-                                <Skeleton className="h-6 w-3/4 rounded-lg mb-2" />
-                                <Skeleton className="h-4 w-32 rounded-lg" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+        <div className="mt-8 flex items-start gap-3 rounded-civic-lg border border-civic-line bg-civic-stone/70 p-4 text-sm leading-6 text-civic-textMuted">
+          <Video className="mt-0.5 h-4 w-4 shrink-0 text-semantic-primary" aria-hidden />
+          <p>
+            Pastikan ID video berasal dari kanal resmi pemerintah sebelum
+            halaman ini dipakai untuk produksi.
+          </p>
         </div>
-    );
+      </Section>
+    </PageShell>
+  );
 }

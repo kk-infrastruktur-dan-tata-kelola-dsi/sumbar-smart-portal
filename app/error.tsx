@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { AlertCircle } from "lucide-react";
+
+import { EmptyState, PageShell } from "@/components/ui";
 
 export default function Error({
   error,
@@ -10,22 +13,26 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
-    /* eslint-disable no-console */
     console.error(error);
   }, [error]);
 
   return (
-    <div>
-      <h2>Something went wrong!</h2>
-      <button
-        onClick={
-          // Attempt to recover by trying to re-render the segment
-          () => reset()
+    <PageShell as="main">
+      <EmptyState
+        icon={<AlertCircle className="h-7 w-7" aria-hidden />}
+        title="Halaman gagal dimuat"
+        description="Terjadi gangguan saat memuat halaman. Coba muat ulang bagian ini."
+        tone="warning"
+        actions={
+          <button
+            type="button"
+            onClick={() => reset()}
+            className="civic-focus-ring rounded-civic-lg bg-brand-gold-500 px-4 py-2 text-sm font-bold text-white"
+          >
+            Coba lagi
+          </button>
         }
-      >
-        Try again
-      </button>
-    </div>
+      />
+    </PageShell>
   );
 }

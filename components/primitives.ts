@@ -4,13 +4,13 @@ export const title = tv({
   base: "tracking-tight inline font-semibold",
   variants: {
     color: {
-      violet: "from-[#FF1CF7] to-[#b249f8]",
-      yellow: "from-[#FF705B] to-[#FFB457]",
-      blue: "from-[#5EA2EF] to-[#0072F5]",
-      cyan: "from-[#00b7fa] to-[#01cfea]",
-      green: "from-[#6FEE8D] to-[#17c964]",
-      pink: "from-[#FF72E1] to-[#F54C7A]",
-      foreground: "dark:from-[#FFFFFF] dark:to-[#4B4B4B]",
+      violet: "from-brand-rantau-500 to-brand-rantau-700",
+      yellow: "from-brand-gold-400 to-brand-gold-600",
+      blue: "from-brand-rantau-400 to-brand-rantau-700",
+      cyan: "from-brand-rantau-300 to-brand-rantau-500",
+      green: "from-brand-alam-300 to-brand-alam-600",
+      pink: "from-brand-marawa-300 to-brand-marawa-600",
+      foreground: "from-civic-text to-civic-textMuted",
     },
     size: {
       sm: "text-3xl lg:text-4xl",

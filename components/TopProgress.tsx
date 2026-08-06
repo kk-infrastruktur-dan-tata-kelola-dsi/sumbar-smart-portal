@@ -66,17 +66,9 @@ export default function TopProgress() {
   return (
     <div
       aria-hidden
+      className="fixed left-0 top-0 z-[60] h-[3px] bg-gradient-to-r from-brand-gold-500 to-brand-gold-300 shadow-civic-sm transition-[width,opacity] duration-200 ease-out"
       style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
         width: `${progress}%`,
-        height: 3,
-        zIndex: 9999,
-        background:
-          "linear-gradient(90deg, #f59e0b, #facc15)",
-        boxShadow: "0 0 8px rgba(245, 158, 11, 0.6)",
-        transition: "width 150ms ease-out, opacity 200ms ease",
         opacity: visible ? 1 : 0,
       }}
     />

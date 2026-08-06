@@ -1,254 +1,261 @@
 "use client";
 
 import {
-    Navbar as HeroUINavbar,
-    NavbarBrand,
-    NavbarContent,
-    NavbarItem,
-    NavbarMenuToggle,
-    NavbarMenu,
-    NavbarMenuItem,
+  Navbar as HeroUINavbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle,
 } from "@heroui/navbar";
 import {
-    Dropdown,
-    DropdownTrigger,
-    DropdownMenu,
-    DropdownItem,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
 } from "@heroui/dropdown";
-import {
-    Accordion,
-    AccordionItem,
-} from "@heroui/accordion";
-import Image from "next/image";
 import { Button } from "@heroui/button";
-import { Link } from "@heroui/link";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, Search } from "lucide-react";
+import Image from "next/image";
 import NextLink from "next/link";
-import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import React from "react";
+import clsx from "clsx";
 
+import {
+  navigationGroups,
+  priorityMobileLinks,
+  type NavigationGroup,
+} from "@/config/navigation";
 import { siteConfig } from "@/config/site";
-import logoImage from '@/public/images/logo.png';
-import MinangQuote from "./MinangQuote";
+import logoImage from "@/public/images/logo.png";
+
+function isGroupActive(group: NavigationGroup, pathname: string) {
+  if (group.href === "/") return pathname === "/";
+  if (group.href && pathname.startsWith(group.href)) return true;
+
+  return Boolean(
+    group.items?.some((item) => {
+      const href = item.href.split("#")[0];
+      return href === "/" ? pathname === "/" : pathname.startsWith(href);
+    }),
+  );
+}
 
 export const Navbar = () => {
-    const pathname = usePathname();
-    const [mounted, setMounted] = React.useState(false);
-    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
 
-    React.useEffect(() => {
-        setMounted(true);
-    }, []);
-    
-    // Close menu when route changes (mobile)
-    React.useEffect(() => {
-        setIsMenuOpen(false);
-    }, [pathname]);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    const profilDropdownItems = [
-        { name: "Visi & Misi", href: "/profile" },
-        { name: "Struktur dan Organisasi", href: "/profile#struktur" },
-    ];
+  React.useEffect(() => {
+    const sentinel = document.createElement("div");
 
-    const informasiDropdownItems = [
-        { name: "Informasi", href: "/informasi" },
-        { name: "Berita", href: "/informasi/berita" },
-        { name: "Foto", href: "/informasi/foto" },
-        { name: "Video", href: "/informasi/video" },
-        { name: "Infografis", href: "/informasi/infografis" },
-        { name: "Agenda", href: "/informasi/agenda" },
-        { name: "Pedoman Teknis", href: "/informasi#pedoman-teknis" },
-    ];
+    sentinel.setAttribute("aria-hidden", "true");
+    sentinel.style.position = "absolute";
+    sentinel.style.top = "0";
+    sentinel.style.height = "1px";
+    sentinel.style.width = "1px";
+    document.body.prepend(sentinel);
 
-    const navLinks = [
-        { name: "Beranda", href: "/" },
-        { name: "Profil", href: "/profile", hasDropdown: true, dropdownItems: profilDropdownItems },
-        { name: "Informasi", href: "/informasi", hasDropdown: true, dropdownItems: informasiDropdownItems },
-        { name: "Pengumuman", href: "/pengumuman"},
-        { name: "Anti Hoax", href: "/anti_hoax" },
-        { name: "Informasi Layanan", href: "/informasi-layanan"},
-        { name: "Keuangan Daerah", href: "/keuangan" },
-        { name: "Budaya", href: "/budaya" },
-        { name: "Inovasi", href: "/inovasi" },
-        { name: "OPD", href: "/opd" },
-    ];
-
-    return (
-        <header className="w-full flex flex-col">
-            <HeroUINavbar 
-                maxWidth="full" 
-                isBordered 
-                isMenuOpen={isMenuOpen}
-                onMenuOpenChange={setIsMenuOpen}
-                classNames={{
-                    wrapper: "px-2 sm:px-4",
-                }}
-            >
-                {/* Kiri: Logo + Toggle */}
-                <NavbarContent justify="start" className="gap-1 sm:gap-2 flex-shrink-0">
-                    <NavbarMenuToggle 
-                        className="lg:hidden w-8 h-8 min-w-8"
-                        icon={(isOpen) => <Menu className="w-5 h-5" />}
-                    />
-                    <NavbarBrand className="flex flex-row gap-1 sm:gap-2 flex-shrink-0 mr-0">
-                        <Image 
-                            src={logoImage} 
-                            alt="Logo Provinsi Sumatera Barat" 
-                            className="h-8 sm:h-10 w-auto flex-shrink-0" 
-                        />
-                        <div className="flex flex-col items-start min-w-0">
-                            <NextLink href="/" className="font-bold text-inherit text-xs sm:text-base whitespace-nowrap tracking-tighter">
-                                {siteConfig.name}
-                            </NextLink>
-                            <span className="text-[10px] sm:text-sm text-neutral-500 hidden md:block w-full tracking-tight">
-                                {siteConfig.description}
-                            </span>
-                        </div>
-                    </NavbarBrand>
-                </NavbarContent>
-
-                {/* Kanan: Minang Quote */}
-                <NavbarContent justify="end" className="gap-1 flex-shrink-0">
-                    <NavbarItem className="hidden lg:flex">
-                        <MinangQuote />
-                    </NavbarItem>
-                </NavbarContent>
-
-                {/* Mobile/Tablet Menu */}
-                <NavbarMenu className="pt-4 px-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
-                    <NavbarMenuItem className="lg:hidden mb-3 pb-3 border-b border-divider">
-                        <MinangQuote />
-                    </NavbarMenuItem>
-                    
-                    {navLinks.map((item, index) => {
-                        const isActive = mounted && pathname === item.href;
-                        const isSubItemActive = mounted && item.dropdownItems?.some(sub => pathname === sub.href);
-                        
-                        if (item.hasDropdown && item.dropdownItems) {
-                            return (
-                                <NavbarMenuItem key={`${item.name}-${index}`} className="w-full">
-                                    <Accordion 
-                                        className="px-0"
-                                        itemClasses={{
-                                            base: "px-0",
-                                            title: "text-base font-medium py-0",
-                                            trigger: "px-0 py-2 hover:bg-transparent data-[hover=true]:bg-transparent",
-                                            content: "px-0 pt-0 pb-0",
-                                            indicator: "text-foreground",
-                                        }}
-                                    >
-                                        <AccordionItem
-                                            key="1"
-                                            aria-label={item.name}
-                                            title={
-                                                <span className={clsx(
-                                                    "text-base font-medium",
-                                                    (isActive || isSubItemActive) && "text-white bg-[#FFB900] rounded-full font-semibold px-4 py-2"
-                                                )}>
-                                                    {item.name}
-                                                </span>
-                                            }
-                                        >
-                                            <div className="flex flex-col pl-4 pt-1">
-                                                {item.dropdownItems.map((subItem, subIndex) => {
-                                                    const isSubActive = mounted && pathname === subItem.href;
-                                                    return (
-                                                        <Link
-                                                            key={`${subItem.name}-${subIndex}`}
-                                                            href={subItem.href}
-                                                            className={clsx(
-                                                                "w-full text-sm py-2",
-                                                                isSubActive ? "text-white bg-[#FFB900] rounded-full font-semibold px-4" : "text-foreground"
-                                                            )}
-                                                            onClick={() => setIsMenuOpen(false)}
-                                                        >
-                                                            {subItem.name}
-                                                        </Link>
-                                                    );
-                                                })}
-                                            </div>
-                                        </AccordionItem>
-                                    </Accordion>
-                                </NavbarMenuItem>
-                            );
-                        }
-                        
-                        return (
-                            <NavbarMenuItem key={`${item.name}-${index}`} className="w-full">
-                                <Link
-                                    className={clsx(
-                                        "w-full block text-base font-medium py-2",
-                                        isActive ? "text-white bg-[#FFB900] rounded-full font-semibold px-4" : "text-foreground"
-                                    )}
-                                    href={item.href}
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    {item.name}
-                                </Link>
-                            </NavbarMenuItem>
-                        );
-                    })}
-                </NavbarMenu>
-            </HeroUINavbar>
-
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex w-full justify-center items-center h-14 bg-background">
-                <div className="flex gap-6">
-                    {navLinks.map((item) => {
-                        const isActive = mounted && pathname === item.href;
-                        const isSubItemActive = mounted && item.dropdownItems?.some(sub => pathname === sub.href);
-                        
-                        if (item.hasDropdown && item.dropdownItems) {
-                            return (
-                                <Dropdown key={item.name}>
-                                    <DropdownTrigger>
-                                        <Button
-                                            variant="light"
-                                            className={clsx(
-                                                "text-sm font-medium hover:text-[#FFB900] transition-all relative p-0 h-auto min-w-0 bg-transparent data-[hover=true]:bg-transparent",
-                                                (isActive || isSubItemActive) && "text-[#FFB900] font-semibold",
-                                                (isActive || isSubItemActive) && "after:content-[''] after:absolute after:bottom-[-10px] after:left-0 after:right-0 after:h-[3px] after:bg-[#FFB900] after:transition-all"
-                                            )}
-                                            endContent={<ChevronDown className="w-4 h-4" />}
-                                        >
-                                            {item.name}
-                                        </Button>
-                                    </DropdownTrigger>
-                                    <DropdownMenu aria-label={`${item.name} menu`}>
-                                        {item.dropdownItems.map((subItem) => (
-                                            <DropdownItem
-                                                key={subItem.name}
-                                                href={subItem.href}
-                                                className={clsx(
-                                                    mounted && pathname === subItem.href && "text-[#FFB900] font-semibold"
-                                                )}
-                                            >
-                                                {subItem.name}
-                                            </DropdownItem>
-                                        ))}
-                                    </DropdownMenu>
-                                </Dropdown>
-                            );
-                        }
-                        
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                color="foreground"
-                                className={clsx(
-                                    "text-sm font-medium hover:text-[#FFB900] transition-all relative",
-                                    isActive && "text-[#FFB900] font-semibold",
-                                    isActive && "after:content-[''] after:absolute after:bottom-[-10px] after:left-0 after:right-0 after:h-[3px] after:bg-[#FFB900] after:transition-all"
-                                )}
-                            >
-                                {item.name}
-                            </Link>
-                        );
-                    })}
-                </div>
-            </nav>
-        </header>
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsScrolled(!entry.isIntersecting),
+      { threshold: 0 },
     );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+      sentinel.remove();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+
+  return (
+    <header
+      className={clsx(
+        "sticky top-0 z-30 border-b border-civic-line backdrop-blur transition duration-civic supports-[backdrop-filter]:bg-civic-paper/86",
+        isScrolled
+          ? "bg-civic-paper/98 shadow-civic-xs"
+          : "bg-civic-paper/90 shadow-none",
+      )}
+    >
+      <HeroUINavbar
+        maxWidth="full"
+        isMenuOpen={isMenuOpen}
+        onMenuOpenChange={setIsMenuOpen}
+        classNames={{
+          base: "bg-transparent",
+          wrapper: "mx-auto h-16 max-w-civic-wide px-4 sm:px-6 lg:px-10",
+        }}
+      >
+        <NavbarContent justify="start" className="gap-3">
+          <NavbarMenuToggle
+            className="lg:hidden"
+            icon={() => <Menu className="h-5 w-5" />}
+          />
+
+          <NavbarBrand className="min-w-0 gap-3">
+            <Image
+              src={logoImage}
+              alt="Logo Provinsi Sumatera Barat"
+              className="h-10 w-auto shrink-0"
+              priority
+            />
+            <div className="min-w-0">
+              <NextLink
+                href="/"
+                className="block truncate text-sm font-extrabold leading-tight text-civic-text sm:text-base"
+              >
+                {siteConfig.name}
+              </NextLink>
+              <span className="hidden truncate text-xs font-medium text-civic-textMuted sm:block">
+                {siteConfig.description}
+              </span>
+            </div>
+          </NavbarBrand>
+        </NavbarContent>
+
+        <NavbarContent justify="center" className="hidden gap-1 lg:flex">
+          {navigationGroups.map((group) => {
+            const active = mounted && isGroupActive(group, pathname);
+
+            if (group.items?.length) {
+              return (
+                <Dropdown key={group.name} placement="bottom">
+                  <NavbarItem>
+                    <DropdownTrigger>
+                      <Button
+                        variant="light"
+                        endContent={<ChevronDown className="h-4 w-4" />}
+                        className={clsx(
+                          "h-10 rounded-civic px-3 text-sm font-semibold text-civic-textMuted transition duration-civic data-[hover=true]:bg-brand-gold-50 data-[hover=true]:text-civic-text",
+                          active && "bg-brand-gold-50 text-semantic-primary",
+                        )}
+                      >
+                        {group.name}
+                      </Button>
+                    </DropdownTrigger>
+                  </NavbarItem>
+                  <DropdownMenu
+                    aria-label={`${group.name} menu`}
+                    itemClasses={{
+                      base: "data-[hover=true]:bg-brand-gold-50",
+                    }}
+                  >
+                    {group.items.map((item) => (
+                      <DropdownItem
+                        key={item.href}
+                        href={item.href}
+                        description={item.description}
+                        className={clsx(
+                          pathname === item.href.split("#")[0] &&
+                            "text-semantic-primary",
+                        )}
+                      >
+                        {item.name}
+                      </DropdownItem>
+                    ))}
+                  </DropdownMenu>
+                </Dropdown>
+              );
+            }
+
+            return (
+              <NavbarItem key={group.name}>
+                <NextLink
+                  href={group.href ?? "/"}
+                  className={clsx(
+                    "civic-focus-ring rounded-civic px-3 py-2 text-sm font-semibold text-civic-textMuted transition duration-civic hover:bg-brand-gold-50 hover:text-civic-text",
+                    active && "bg-brand-gold-50 text-semantic-primary",
+                  )}
+                >
+                  {group.name}
+                </NextLink>
+              </NavbarItem>
+            );
+          })}
+        </NavbarContent>
+
+        <NavbarContent justify="end" className="hidden sm:flex">
+          <NavbarItem>
+            <NextLink
+              href="/informasi"
+              className="civic-focus-ring inline-flex h-10 items-center gap-2 rounded-civic border border-civic-line bg-civic-cloud px-3 text-sm font-semibold text-civic-text transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+            >
+              <Search className="h-4 w-4" />
+              Cari informasi
+            </NextLink>
+          </NavbarItem>
+        </NavbarContent>
+
+        <NavbarMenu className="max-h-[calc(100dvh-4rem)] overflow-y-auto bg-civic-paper px-4 pb-8 pt-5">
+          <NavbarMenuItem>
+            <div className="rounded-civic-xl border border-civic-line bg-civic-cloud p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-semantic-primary">
+                Akses cepat
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {priorityMobileLinks.map((item) => (
+                  <NextLink
+                    key={item.href}
+                    href={item.href}
+                    className="civic-focus-ring rounded-civic border border-civic-line bg-civic-paper px-3 py-2 text-sm font-semibold text-civic-text hover:border-brand-gold-300 hover:bg-brand-gold-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </NextLink>
+                ))}
+              </div>
+            </div>
+          </NavbarMenuItem>
+
+          <NavbarMenuItem className="mt-4">
+            <div className="space-y-4">
+              {navigationGroups.map((group) => (
+                <div key={group.name}>
+                  {group.href && !group.items?.length ? (
+                    <NextLink
+                      href={group.href}
+                      className="block rounded-civic px-2 py-2 text-base font-bold text-civic-text"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {group.name}
+                    </NextLink>
+                  ) : (
+                    <>
+                      <p className="px-2 py-2 text-base font-bold text-civic-text">
+                        {group.name}
+                      </p>
+                      <div className="grid gap-1 pl-3">
+                        {group.items?.map((item) => (
+                          <NextLink
+                            key={item.href}
+                            href={item.href}
+                            className="rounded-civic px-3 py-2 text-sm font-medium text-civic-textMuted hover:bg-brand-gold-50 hover:text-civic-text"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            {item.name}
+                          </NextLink>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </NavbarMenuItem>
+        </NavbarMenu>
+      </HeroUINavbar>
+    </header>
+  );
 };

@@ -7,7 +7,7 @@ type KabupatenItem = {
   name: string;
   lat: number;
   lng: number;
-  color: string; // hex color from database e.g., #3b82f6
+  color: string;
   itemCount?: number; // Number of budaya items in this kabupaten
 };
 
@@ -203,28 +203,6 @@ export default function MapSumbar({
       };
       containerRef.current?.addEventListener("click", onContainerClick, { capture: true });
 
-      // After first paint, probe center point for overlays blocking pointer events
-      setTimeout(() => {
-        try {
-          const rect2 = containerRef.current?.getBoundingClientRect();
-          if (rect2) {
-            const cx = rect2.left + rect2.width / 2;
-            const cy = rect2.top + rect2.height / 2;
-            const stack = document.elementsFromPoint(cx, cy) as HTMLElement[];
-            const blocker = stack.find((el) => el !== containerRef.current && !el.className.toString().includes("leaflet") && window.getComputedStyle(el).pointerEvents !== "none");
-            if (blocker) {
-              console.warn("[MapSumbar] Potential overlay above map center", {
-                tag: blocker.tagName,
-                id: blocker.id,
-                class: blocker.className,
-                z: window.getComputedStyle(blocker).zIndex,
-                pe: window.getComputedStyle(blocker).pointerEvents,
-              });
-            }
-          }
-        } catch {}
-      }, 300);
-
       // Cleanup
       return () => {
         containerRef.current?.removeEventListener("click", onContainerClick, { capture: true } as any);
@@ -252,26 +230,28 @@ export default function MapSumbar({
 
     const layer = L.layerGroup();
 
-    items.forEach((kab: any, idx: number) => {
-      const fill = kab.color ?? "#F97316";
+    items.forEach((kab: any) => {
+      const fill = kab.color ?? "var(--color-civic-primary)";
       const isSel = selectedKey === kab.key;
       const itemCount = kab.itemCount || 0;
 
-      console.log('[MapSumbar] 🎨 Creating marker for', kab.key, 'color:', fill);
+      if (debug) {
+        console.info("[MapSumbar] Creating marker", { key: kab.key, fill });
+      }
 
       // USE CIRCLEMARKER - native Leaflet, clicks work reliably in Chrome!
       const marker = L.circleMarker([kab.lat, kab.lng], {
         radius: isSel ? 12 : 10,
         fillColor: fill,
         fillOpacity: 0.9,
-        color: isSel ? '#FACC15' : '#FFFFFF',
+        color: isSel ? "var(--color-civic-primary)" : "var(--color-civic-cloud)",
         weight: isSel ? 3 : 2,
         interactive: true,
         bubblingMouseEvents: false
       }).addTo(layer);
       
       // Tooltip on hover (shows kabupaten name + count)
-      const tooltipContent = `<div style="text-align: center;"><strong>${kab.name}</strong><br/><span style="font-size: 11px; color: #666;">${itemCount} item budaya</span></div>`;
+      const tooltipContent = `<div style="text-align: center;"><strong>${kab.name}</strong><br/><span style="font-size: 11px; color: var(--color-civic-text-muted);">${itemCount} item budaya</span></div>`;
       marker.bindTooltip(tooltipContent, { 
         direction: "top", 
         offset: [0, -15], 
@@ -285,7 +265,9 @@ export default function MapSumbar({
       
       // Click handler - works in all browsers with CircleMarker!
       marker.on('click', (e: any) => {
-        console.log('[MapSumbar] 🟣 CircleMarker clicked ->', kab.key);
+        if (debug) {
+          console.info("[MapSumbar] CircleMarker clicked", { key: kab.key });
+        }
         L.DomEvent.stopPropagation(e);
         try {
           onSelect(kab.key);
@@ -311,18 +293,19 @@ export default function MapSumbar({
     layer.addTo(mapRef.current);
     markersLayerRef.current = layer;
     
-    console.log(`[MapSumbar] ✅ Rendered ${items.length} CircleMarkers on map`, {
-      keys: items.map(k => k.key),
-      selectedKey
-    });
-    
-    console.log('[MapSumbar] 🎯 CircleMarkers use native Leaflet clicks - should work in all browsers!');
+    if (debug) {
+      console.info("[MapSumbar] Rendered CircleMarkers", {
+        count: items.length,
+        keys: items.map((item) => item.key),
+        selectedKey,
+      });
+    }
   }, [items, selectedKey, Lmods, onSelect, debug]);
 
   // Don't render on server to avoid hydration mismatch
   if (!mounted) return null;
 
   return (
-    <div ref={containerRef} style={{ height: 600, width: "100%" }} className="relative bg-gray-100" />
+    <div ref={containerRef} style={{ height: "100%", width: "100%" }} className="relative bg-civic-stone" />
   );
 }

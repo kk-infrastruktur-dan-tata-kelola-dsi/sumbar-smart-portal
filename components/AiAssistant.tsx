@@ -4,94 +4,150 @@ import React from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@heroui/button";
-import { Card } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
 import { Alert } from "@heroui/alert";
-import { NotepadText, Volume2, VolumeX } from "lucide-react";
+import {
+  Accessibility,
+  ExternalLink,
+  MessageCircle,
+  NotepadText,
+  Send,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
+
 import { useTTS } from "@/contexts/TTSContext";
 import type { AIMessage } from "@/types/ai";
 
+type Panel = "menu" | "chat" | null;
+type ChatMessage = AIMessage & { id: string };
+
 export default function AiAssistant() {
   const pathname = usePathname();
-  const [open, setOpen] = React.useState(false);
+  const [panel, setPanel] = React.useState<Panel>(null);
   const [input, setInput] = React.useState("");
-  const [messages, setMessages] = React.useState<AIMessage[]>([]);
+  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [greeting, setGreeting] = React.useState<string>("Selamat datang");
   const [timeString, setTimeString] = React.useState<string | null>(null);
-  
-  // Use TTS Context
+
   const { ttsEnabled, isSpeaking, toggleTTS } = useTTS();
-
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const chatContainerRef = React.useRef<HTMLDivElement | null>(null);
-  
-  React.useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messages, loading, open]);
+  const abortRef = React.useRef<AbortController | null>(null);
+  const idRef = React.useRef(0);
+  const pinnedToBottomRef = React.useRef(true);
 
-  // Get dynamic greeting based on time
+  const nextId = React.useCallback(() => {
+    idRef.current += 1;
+
+    return `msg-${idRef.current}`;
+  }, []);
+
+  // Batalkan stream yang masih berjalan saat komponen dilepas,
+  // supaya tidak ada setState setelah unmount.
+  React.useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+
+  const closePanel = React.useCallback(() => {
+    setPanel(null);
+    setError(null);
+  }, []);
+
+  const handleChatScroll = React.useCallback(() => {
+    const el = chatContainerRef.current;
+
+    if (!el) return;
+
+    pinnedToBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  }, []);
+
+  // Auto-scroll hanya saat pengguna berada di dekat dasar. Instan selama
+  // streaming agar tidak tersendat, mulus saat pesan baru/panel dibuka.
+  React.useEffect(() => {
+    const el = chatContainerRef.current;
+
+    if (panel !== "chat" || !el || !pinnedToBottomRef.current) return;
+
+    el.scrollTo({ top: el.scrollHeight, behavior: "instant" });
+  }, [messages, loading, panel]);
+
   React.useEffect(() => {
     const now = new Date();
     const hour = now.getHours();
-    const t = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    const t = now.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
     setTimeString(t);
-    
-    let greetingText = "Selamat malam";
+
     if (hour >= 3 && hour < 10) {
-      greetingText = "Selamat pagi";
+      setGreeting("Selamat pagi");
     } else if (hour >= 10 && hour < 15) {
-      greetingText = "Selamat siang";
+      setGreeting("Selamat siang");
     } else if (hour >= 15 && hour < 18) {
-      greetingText = "Selamat sore";
+      setGreeting("Selamat sore");
+    } else {
+      setGreeting("Selamat malam");
     }
-    setGreeting(greetingText);
   }, []);
 
   const send = async (text?: string) => {
-    const messageText = text || input.trim();
+    const messageText = (text ?? input).trim();
+
     if (!messageText || loading) return;
+
+    setPanel("chat");
     setError(null);
     setLoading(true);
     setInput("");
+    pinnedToBottomRef.current = true;
 
-    // Push user message and placeholder for assistant
-    const next = [
-      ...messages,
-      { role: "user", content: messageText } as AIMessage,
-      { role: "assistant", content: "" } as AIMessage,
-    ];
-    setMessages(next);
+    const userMsg: ChatMessage = {
+      id: nextId(),
+      role: "user",
+      content: messageText,
+    };
+    const assistantMsg: ChatMessage = {
+      id: nextId(),
+      role: "assistant",
+      content: "",
+    };
+
+    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+
+    const controller = new AbortController();
+
+    abortRef.current = controller;
 
     try {
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          prompt: messageText, 
+        body: JSON.stringify({
+          prompt: messageText,
           stream: true,
-          currentPage: pathname 
+          currentPage: pathname,
         }),
+        signal: controller.signal,
       });
 
       if (!res.ok) {
         const ct = res.headers.get("content-type") || "";
+
         if (ct.includes("application/json")) {
           const data = await res.json();
           throw new Error(data?.error || data?.details || "Request failed");
-        } else {
-          const txt = await res.text();
-          throw new Error(txt || "Request failed");
         }
+
+        const txt = await res.text();
+        throw new Error(txt || "Request failed");
       }
 
-      // Stream response
       if (!res.body) {
         throw new Error("No response body");
       }
@@ -100,173 +156,174 @@ export default function AiAssistant() {
       const decoder = new TextDecoder();
       let acc = "";
 
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        acc += chunk;
-        setMessages((prev) => {
-          const copy = [...prev];
-          // Update last assistant message
-          for (let i = copy.length - 1; i >= 0; i--) {
-            if (copy[i].role === "assistant") {
-              copy[i] = { ...copy[i], content: acc } as AIMessage;
-              break;
-            }
-          }
-          return copy;
-        });
+
+        acc += decoder.decode(value, { stream: true });
+        const content = acc;
+
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantMsg.id ? { ...m, content } : m)),
+        );
       }
 
-      // Final update to ensure complete content
-      setMessages((prev) => {
-        const copy = [...prev];
-        for (let i = copy.length - 1; i >= 0; i--) {
-          if (copy[i].role === "assistant") {
-            copy[i] = { ...copy[i], content: acc || "(no response)" } as AIMessage;
-            break;
-          }
-        }
-        return copy;
-      });
-    } catch (e: any) {
-      setError(e?.message || String(e));
-      // Remove placeholder assistant message on error
-      setMessages((prev) => {
-        const copy = [...prev];
-        if (copy.length > 0 && copy[copy.length - 1].role === "assistant" && !copy[copy.length - 1].content) {
-          copy.pop();
-        }
-        return copy;
-      });
+      if (!acc) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMsg.id ? { ...m, content: "(no response)" } : m,
+          ),
+        );
+      }
+    } catch (e: unknown) {
+      if (controller.signal.aborted) return;
+      setError(e instanceof Error ? e.message : String(e));
+      setMessages((prev) =>
+        prev.filter((m) => !(m.id === assistantMsg.id && !m.content)),
+      );
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      send();
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   };
 
   const quickActions = [
-    { label: "Tempat wisata di Sumbar", text: "Apa saja tempat wisata menarik di Sumatera Barat?" },
-    { label: "APBD tahun 2025", text: "Berapa anggaran Sumbar tahun 2025?" },
-    { label: "Cara akses PPID", text: "Bagaimana cara mengakses informasi publik melalui PPID?" },
-    { label: "Laporan keuangan daerah", text: "Bagaimana cara melihat laporan keuangan daerah Sumbar?" },
+    {
+      label: "Tempat wisata di Sumbar",
+      text: "Apa saja tempat wisata menarik di Sumatera Barat?",
+    },
+    {
+      label: "APBD tahun 2025",
+      text: "Berapa anggaran Sumbar tahun 2025?",
+    },
+    {
+      label: "Cara akses PPID",
+      text: "Bagaimana cara mengakses informasi publik melalui PPID?",
+    },
+    {
+      label: "Laporan keuangan daerah",
+      text: "Bagaimana cara melihat laporan keuangan daerah Sumbar?",
+    },
   ];
 
+  const isOpen = panel !== null;
+
   return (
-    <>
-      {/* Floating Accessibility/TTS Button */}
-      <div className="fixed bottom-44 right-6 z-50 group" suppressHydrationWarning>
-        <div className="flex items-center gap-2" suppressHydrationWarning>
-          <span className={`${ttsEnabled ? 'bg-success text-success-foreground' : 'bg-danger text-danger-foreground'} px-4 py-2 rounded-full shadow-lg font-medium text-sm whitespace-nowrap opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none`}>
-            {ttsEnabled ? "Mode Aksesibilitas: Aktif" : "Mode Aksesibilitas"}
-          </span>
-          <Button
-            color={ttsEnabled ? "success" : "danger"}
-            radius="full"
-            size="lg"
-            onPress={toggleTTS}
-            isIconOnly
-            aria-label={ttsEnabled ? "Nonaktifkan Mode Aksesibilitas" : "Aktifkan Mode Aksesibilitas"}
-            className="shadow-lg relative"
-          >
-            {isSpeaking ? (
-              <Volume2 className="w-6 h-6 animate-pulse" />
-            ) : ttsEnabled ? (
-              <Volume2 className="w-6 h-6" />
-            ) : (
-              <VolumeX className="w-6 h-6" />
-            )}
-            {ttsEnabled && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full animate-pulse" />
-            )}
-          </Button>
-        </div>
-      </div>
+    <div className="fixed bottom-5 right-5 z-50" suppressHydrationWarning>
+      {panel === "menu" && (
+        <div className="chat-panel-enter mb-3 w-[min(calc(100vw-2.5rem),360px)] rounded-civic-xl border border-civic-line bg-civic-cloud p-4 shadow-civic-md">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-semantic-primary">
+                Pusat bantuan
+              </p>
+              <h2 className="mt-1 text-lg font-bold text-civic-text">
+                Butuh bantuan?
+              </h2>
+            </div>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              onPress={closePanel}
+              aria-label="Tutup pusat bantuan"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
 
-      {/* Floating Notepad Button */}
-      <div className="fixed bottom-24 right-6 z-50 group" suppressHydrationWarning>
-        <div className="flex items-center gap-2" suppressHydrationWarning>
-          <span className="bg-warning text-warning-foreground px-4 py-2 rounded-full shadow-lg font-medium text-sm whitespace-nowrap opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none">
-            Survei Kepuasan Masyarakat
-          </span>
-          <Button
-            as="a"
-            href="https://forms.gle/AhScbDbK5g8551C59"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="warning"
-            radius="full"
-            size="lg"
-            isIconOnly
-            aria-label="Open Survey"
-            className="shadow-lg"
-          >
-            <NotepadText className="w-6 h-6 text-black rotate-[-15deg]" />
-          </Button>
-        </div>
-      </div>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => setPanel("chat")}
+              className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+            >
+              <Image
+                src="/images/tanyomamak.svg"
+                alt=""
+                width={28}
+                height={28}
+                className="h-7 w-7"
+              />
+              <span>
+                <span className="block text-sm font-bold text-civic-text">
+                  Tanyo Mamak
+                </span>
+                <span className="block text-xs text-civic-textMuted">
+                  Tanya layanan dan informasi Sumbar.
+                </span>
+              </span>
+            </button>
 
-      {/* Floating Chat Button */}
-      <div className="fixed bottom-6 right-6 z-50 group" suppressHydrationWarning>
-        <div className="flex items-center gap-2" suppressHydrationWarning>
-          <span className="bg-warning text-warning-foreground px-4 py-2 rounded-full shadow-lg font-medium text-sm whitespace-nowrap opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none">
-            Tanyo Mamak
-          </span>
-          <Button
-            color="warning"
-            radius="full"
-            size="lg"
-            onPress={() => setOpen((v) => !v)}
-            isIconOnly
-            aria-label={open ? "Close AI Assistant" : "Open AI Assistant"}
-            className="shadow-lg p-3"
-          >
-            {open ? (
-              <span className="text-xl">✖</span>
-            ) : (
-              <Image src="/images/tanyomamak.svg" alt="Tanyo Mamak" width={32} height={32} className="w-8 h-8" />
-            )}
-          </Button>
-        </div>
-      </div>
+            <a
+              href="https://forms.gle/AhScbDbK5g8551C59"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+            >
+              <NotepadText className="h-5 w-5 text-semantic-primary" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-civic-text">
+                  Survey Kepuasan Masyarakat
+                </span>
+                <span className="block text-xs text-civic-textMuted">
+                  Buka formulir penilaian layanan.
+                </span>
+              </span>
+              <ExternalLink className="h-4 w-4 text-civic-textSubtle" />
+            </a>
 
-      {/* Anchored Sliding Panel */}
-      <div
-        className={
-          `fixed right-6 z-50 transition-all duration-200 ` +
-          (open
-            ? "bottom-24 opacity-100 translate-y-0"
-            : "bottom-6 opacity-0 translate-y-3 pointer-events-none")
-        }
-      >
-        <div className="w-[340px] sm:w-[420px] max-h-[70vh] flex flex-col bg-white dark:bg-background rounded-3xl shadow-2xl border-0 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-warning to-warning-400 text-warning-foreground px-4 py-4 flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3 flex-1">
-              <div className="bg-transparent rounded-full p-2 mt-1">
-                <Image src="/images/tanyomamak.svg" alt="Tanyo Mamak" width={32} height={32} className="w-8 h-8" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-base">Tanyo Mamak</h3>
-                <p className="text-xs opacity-90 mt-0.5">Siap membantu 24/7</p>
+            <button
+              type="button"
+              onClick={toggleTTS}
+              className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+            >
+              {ttsEnabled ? (
+                <Volume2 className="h-5 w-5 text-semantic-success" />
+              ) : (
+                <VolumeX className="h-5 w-5 text-civic-textMuted" />
+              )}
+              <span>
+                <span className="block text-sm font-bold text-civic-text">
+                  Mode aksesibilitas
+                </span>
+                <span className="block text-xs text-civic-textMuted">
+                  {ttsEnabled ? "Aktif" : "Nonaktif"}
+                  {isSpeaking ? " - sedang membacakan" : ""}
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {panel === "chat" && (
+        <div className="chat-panel-enter mb-3 flex max-h-[min(70vh,620px)] w-[min(calc(100vw-2.5rem),430px)] flex-col overflow-hidden rounded-civic-xl border border-civic-line bg-civic-cloud shadow-civic-md">
+          <div className="flex items-start justify-between gap-3 border-b border-civic-line bg-brand-gold-50 px-4 py-4">
+            <div className="flex items-start gap-3">
+              <Image
+                src="/images/tanyomamak.svg"
+                alt=""
+                width={36}
+                height={36}
+                className="h-9 w-9"
+              />
+              <div>
+                <h3 className="font-bold text-civic-text">Tanyo Mamak</h3>
+                <p className="text-xs text-civic-textMuted">
+                  Bantuan informasi Provinsi Sumatera Barat
+                </p>
               </div>
             </div>
-            <Button 
-              variant="light" 
-              isIconOnly 
-              size="sm" 
-              onPress={() => setOpen(false)} 
-              aria-label="Close"
-              className="text-warning-foreground"
+            <Button
+              variant="light"
+              isIconOnly
+              size="sm"
+              onPress={closePanel}
+              aria-label="Tutup Tanyo Mamak"
             >
-              ✖
+              <X className="h-4 w-4" />
             </Button>
           </div>
 
@@ -278,68 +335,81 @@ export default function AiAssistant() {
             </div>
           )}
 
-          {/* Messages Area */}
-          <div ref={chatContainerRef} className="px-4 py-3 flex-1 overflow-auto scroll-smooth">
+          <div
+            ref={chatContainerRef}
+            onScroll={handleChatScroll}
+            className="flex-1 overflow-auto px-4 py-3"
+          >
             <div className="flex flex-col gap-3">
-              {/* Welcome Message */}
               {messages.length === 0 && (
-                <div className="mb-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                  <div className="bg-gradient-to-br from-warning-50 to-warning-100 dark:from-warning-900/20 dark:to-warning-800/20 rounded-2xl p-4 border-0">
-                    <div>
-                      <p className="text-sm font-semibold mb-1" suppressHydrationWarning>👋 {greeting}!</p>
-                      <p className="text-sm leading-relaxed text-foreground-700">
-                        Saya Mamak. Sebagai Mamak siap membantu Anda menemukan informasi tentang wisata, keuangan daerah, layanan digital, dan berbagai informasi lainnya seputar Sumatera Barat. Ada yang bisa saya bantu?
-                      </p>
-                      <div className="mt-3 text-xs text-foreground-500" suppressHydrationWarning>
-                        {timeString ?? ""}
-                      </div>
-                    </div>
-                  </div>
+                <div className="rounded-civic-lg border border-civic-line bg-civic-paper p-4">
+                  <p className="text-sm font-semibold text-civic-text" suppressHydrationWarning>
+                    {greeting}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-civic-textMuted">
+                    Saya Mamak. Saya bisa membantu mencari informasi tentang
+                    layanan, keuangan daerah, PPID, budaya, dan pengumuman
+                    resmi Sumatera Barat.
+                  </p>
+                  <p className="mt-3 text-xs text-civic-textSubtle" suppressHydrationWarning>
+                    {timeString ?? ""}
+                  </p>
                 </div>
               )}
 
-              
-
-              {/* Chat Messages */}
-              {messages.map((m, idx) => {
+              {messages.map((m) => {
                 const isUser = m.role === "user";
-                const isLastAssistantMessage = !isUser && idx === messages.length - 1 && loading;
-                
+                const isStreaming =
+                  !isUser &&
+                  loading &&
+                  m.id === messages[messages.length - 1]?.id;
+
                 return (
-                  <div 
-                    key={idx} 
-                    className={`flex ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+                  <div
+                    key={m.id}
+                    className={`chat-message-enter flex ${isUser ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl p-3 border-0 ${
-                        isUser 
-                          ? "bg-warning text-warning-foreground shadow-sm" 
-                          : "bg-gradient-to-br from-default-50 to-default-100 dark:from-default-100 dark:to-default-200 shadow-sm"
-                      } ${!isUser && isLastAssistantMessage ? "w-[85%] min-w-[240px]" : ""}`}
+                      className={`max-w-[85%] rounded-civic-lg p-3 text-sm leading-6 ${
+                        isUser
+                          ? "bg-semantic-primary text-white"
+                          : "bg-civic-paper text-civic-text"
+                      }`}
                     >
                       {isUser ? (
-                        <p className="text-sm whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                        <p className="whitespace-pre-wrap">{m.content}</p>
                       ) : (
-                        <div className="relative">
-                          {!!m.content && (
-                            <div 
-                              className="text-sm whitespace-pre-wrap leading-relaxed prose prose-sm max-w-none"
+                        <div>
+                          {m.content ? (
+                            <div
+                              className="prose prose-sm max-w-none whitespace-pre-wrap"
                               dangerouslySetInnerHTML={{ __html: m.content }}
                             />
-                          )}
-                          {isLastAssistantMessage && (
-                            <div className={`${m.content ? "mt-2" : ""} overflow-hidden`}>
-                              <div className="space-y-2 max-w-full">
-                                <div className="h-3 w-[60%] shimmer-line rounded"></div>
-                                <div className="h-3 w-[75%] shimmer-line rounded"></div>
-                                <div className="h-3 w-[28%] shimmer-line rounded"></div>
-                              </div>
-                              <span className="inline-flex items-center gap-1 mt-2 align-baseline">
-                                <span className="typing-dot bg-warning inline-block w-1.5 h-1.5" style={{ animationDelay: "0ms" }} />
-                                <span className="typing-dot bg-warning inline-block w-1.5 h-1.5" style={{ animationDelay: "150ms" }} />
-                                <span className="typing-dot bg-warning inline-block w-1.5 h-1.5" style={{ animationDelay: "300ms" }} />
-                              </span>
-                            </div>
+                          ) : isStreaming ? (
+                            <span
+                              aria-label="Mamak sedang mengetik"
+                              className="flex items-center gap-1.5 px-0.5 py-1.5"
+                              role="status"
+                            >
+                              <span
+                                className="typing-dot h-2 w-2 bg-civic-textSubtle"
+                                style={{ animationDelay: "0ms" }}
+                              />
+                              <span
+                                className="typing-dot h-2 w-2 bg-civic-textSubtle"
+                                style={{ animationDelay: "160ms" }}
+                              />
+                              <span
+                                className="typing-dot h-2 w-2 bg-civic-textSubtle"
+                                style={{ animationDelay: "320ms" }}
+                              />
+                            </span>
+                          ) : null}
+                          {isStreaming && !!m.content && (
+                            <span
+                              aria-hidden="true"
+                              className="typing-cursor"
+                            />
                           )}
                         </div>
                       )}
@@ -347,38 +417,34 @@ export default function AiAssistant() {
                   </div>
                 );
               })}
-
-              <div ref={scrollRef} />
             </div>
           </div>
 
-          {/* Quick Actions docked above input */}
-          <div className="px-4 pb-2 pt-1 border-t-0">
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-              <p className="text-xs font-semibold text-foreground-700 mb-2">💡 Pertanyaan cepat:</p>
+          {messages.length === 0 && (
+            <div className="border-t border-civic-line px-4 py-3">
+              <p className="mb-2 text-xs font-semibold text-civic-textMuted">
+                Pertanyaan cepat
+              </p>
               <div className="grid grid-cols-2 gap-2">
-                {quickActions.map((action, idx) => (
+                {quickActions.map((action) => (
                   <button
-                    key={idx}
-                    onClick={() => {
-                      setInput(action.text);
-                      send(action.text);
-                    }}
+                    key={action.label}
+                    type="button"
+                    onClick={() => send(action.text)}
                     disabled={loading}
-                    className="h-auto py-2.5 px-3 text-xs text-left whitespace-normal bg-white dark:bg-background border border-default-200 rounded-xl hover:border-warning hover:bg-warning/5 hover:shadow-sm transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="civic-focus-ring rounded-civic border border-civic-line bg-civic-cloud px-3 py-2 text-left text-xs font-medium text-civic-text transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {action.label}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Input Area */}
-          <div className="px-4 py-3 bg-default-50 dark:bg-default-100 flex items-center gap-2 border-0">
+          <div className="flex items-center gap-2 border-t border-civic-line bg-civic-paper px-4 py-3">
             <input
               type="text"
-              className="flex-1 bg-white dark:bg-background rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-warning border border-default-200 transition-all duration-200 hover:border-warning/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="civic-focus-ring min-w-0 flex-1 rounded-civic-lg border border-civic-line bg-civic-cloud px-3 py-2 text-sm text-civic-text outline-none placeholder:text-civic-textSubtle disabled:cursor-not-allowed disabled:opacity-50"
               placeholder="Ketik pertanyaan Anda..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -390,19 +456,38 @@ export default function AiAssistant() {
               }}
               disabled={loading}
             />
-            <Button 
-              color="warning" 
-              isIconOnly 
-              radius="full"
+            <Button
+              color="primary"
+              isIconOnly
+              radius="md"
               onPress={() => send()}
               isDisabled={loading || !input.trim()}
-              className="transition-transform duration-200 hover:scale-110 active:scale-95 shadow-md"
+              aria-label="Kirim pertanyaan"
             >
-              {loading ? <Spinner size="sm" color="current" /> : "➤"}
+              {loading ? <Spinner size="sm" color="current" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
         </div>
-      </div>
-    </>
+      )}
+
+      <Button
+        color={isOpen ? "default" : "primary"}
+        radius="md"
+        onPress={() => (isOpen ? closePanel() : setPanel("menu"))}
+        className="h-12 shadow-civic-md"
+        startContent={
+          isOpen ? (
+            <X className="h-5 w-5" />
+          ) : ttsEnabled ? (
+            <Accessibility className="h-5 w-5" />
+          ) : (
+            <MessageCircle className="h-5 w-5" />
+          )
+        }
+        aria-label={isOpen ? "Tutup pusat bantuan" : "Buka pusat bantuan"}
+      >
+        {isOpen ? "Tutup" : "Bantuan"}
+      </Button>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import { Download, ExternalLink, FileText, X } from "lucide-react";
 
 type FilePreviewModalProps = {
   isOpen: boolean;
@@ -11,126 +12,109 @@ type FilePreviewModalProps = {
 
 export function FilePreviewModal({ isOpen, onClose, fileUrl, title }: FilePreviewModalProps) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "";
+
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
     };
 
     if (isOpen) {
-      window.addEventListener('keydown', handleEscape);
+      window.addEventListener("keydown", handleEscape);
     }
 
-    return () => window.removeEventListener('keydown', handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const fileExtension = fileUrl.split('.').pop()?.toLowerCase();
-  const isPDF = fileExtension === 'pdf';
-  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension || '');
+  const fileExtension = fileUrl.split(".").pop()?.toLowerCase();
+  const isPDF = fileExtension === "pdf";
+  const isImage = ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(
+    fileExtension || "",
+  );
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-civic-charcoal/70 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="file-preview-title"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-civic-xl bg-civic-cloud shadow-civic-md"
+        onClick={(event) => event.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-lg font-bold text-gray-900 truncate pr-4">{title}</h2>
+        <div className="flex items-center justify-between gap-4 border-b border-civic-line p-5">
+          <h2 id="file-preview-title" className="truncate text-lg font-bold text-civic-text">
+            {title}
+          </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
-            aria-label="Close"
+            className="civic-focus-ring flex h-9 w-9 shrink-0 items-center justify-center rounded-civic-md text-civic-textMuted hover:bg-civic-stone hover:text-civic-text"
+            aria-label="Tutup pratinjau"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto bg-gray-50">
+        <div className="flex-1 overflow-auto bg-civic-stone">
           {isPDF ? (
-            <iframe src={fileUrl} className="w-full h-full min-h-[70vh] border-0" title={title} />
+            <iframe
+              src={fileUrl}
+              className="h-full min-h-[70vh] w-full border-0"
+              title={title}
+            />
           ) : isImage ? (
-            <div className="flex items-center justify-center p-8 min-h-[70vh]">
+            <div className="flex min-h-[70vh] items-center justify-center p-8">
               <img
                 src={fileUrl}
                 alt={title}
-                className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                className="max-h-full max-w-full rounded-civic-lg object-contain shadow-civic-sm"
               />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 px-8 min-h-[70vh]">
-              <svg
-                className="w-20 h-20 text-gray-300 mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <p className="text-gray-600 mb-6 text-center">
-                Preview tidak tersedia untuk tipe file ini
+            <div className="flex min-h-[70vh] flex-col items-center justify-center px-8 py-16 text-center">
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-civic-lg bg-brand-rantau-50 text-semantic-info">
+                <FileText className="h-8 w-8" aria-hidden />
+              </div>
+              <p className="mb-6 text-sm leading-6 text-civic-textMuted">
+                Pratinjau tidak tersedia untuk tipe file ini.
               </p>
-
               <a
                 href={fileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="civic-focus-ring inline-flex items-center gap-2 rounded-civic-lg bg-brand-gold-500 px-5 py-3 text-sm font-bold text-white"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                Download File
+                <Download className="h-4 w-4" aria-hidden />
+                Unduh file
               </a>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+        <div className="flex justify-end gap-3 border-t border-civic-line bg-civic-cloud p-4">
           <a
             href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+            className="civic-focus-ring inline-flex items-center gap-2 rounded-civic-md px-3 py-2 text-sm font-semibold text-semantic-primary hover:bg-brand-gold-50"
           >
-            Buka di Tab Baru
+            <ExternalLink className="h-4 w-4" aria-hidden />
+            Buka di tab baru
           </a>
           <button
+            type="button"
             onClick={onClose}
-            className="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm"
+            className="civic-focus-ring rounded-civic-md border border-civic-line px-3 py-2 text-sm font-semibold text-civic-textMuted hover:bg-civic-stone hover:text-civic-text"
           >
             Tutup
           </button>

@@ -1,125 +1,138 @@
-"use client";
-
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Globe } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+
+const footerGroups = [
+  {
+    title: "Layanan",
+    links: [
+      { label: "Survey Kepuasan Masyarakat", href: "/informasi-layanan" },
+      { label: "Keuangan Daerah", href: "/keuangan" },
+      { label: "Inovasi", href: "/inovasi" },
+      { label: "OPD", href: "/opd" },
+    ],
+  },
+  {
+    title: "Informasi",
+    links: [
+      { label: "Berita", href: "/informasi/berita" },
+      { label: "Pengumuman", href: "/pengumuman" },
+      { label: "Agenda", href: "/informasi/agenda" },
+      { label: "Anti Hoax", href: "/anti_hoax" },
+    ],
+  },
+  {
+    title: "Provinsi",
+    links: [
+      { label: "Profil Provinsi", href: "/profile" },
+      { label: "Struktur Organisasi", href: "/profile#struktur" },
+      { label: "Budaya Sumbar", href: "/budaya" },
+      { label: "Infografis", href: "/informasi/infografis" },
+    ],
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1a2332] text-gray-300 py-12 px-4 md:px-8 lg:px-16">
-      <div className="max-w-7xl mx-auto">
-        {/* Grid Utama */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 pb-12">
-          {/* Kolom 1 - Logo dan Deskripsi */}
-          <div className="md:col-span-1">
-            <div className="flex items-center mb-4">
-              <img src="/images/sumbarmap.svg" alt="Sumatera Barat" className="w-10 h-10 object-contain" />
-              <h2 className="ml-3 text-white font-semibold text-base">Sumatera Barat</h2>
+    <footer className="bg-civic-footer text-civic-inverse">
+      <div className="mx-auto max-w-civic-wide px-6 py-12 sm:px-8 lg:px-10">
+        <div className="grid gap-10 border-b border-white/12 pb-10 lg:grid-cols-[1.2fr_2fr]">
+          <div>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/images/sumbarmap.svg"
+                alt="Peta Sumatera Barat"
+                width={44}
+                height={44}
+                className="h-11 w-11"
+              />
+              <div>
+                <h2 className="font-bold text-white">Sumatera Barat</h2>
+                <p className="text-sm text-white/62">
+                  Portal resmi Pemerintah Provinsi
+                </p>
+              </div>
             </div>
-            <p className="text-sm leading-relaxed text-gray-400 mb-6">
-              Portal digital resmi Pemerintah Provinsi Sumatera Barat. Melayani dengan teknologi, berinovasi untuk masa depan.
+            <p className="mt-5 max-w-sm text-sm leading-6 text-white/68">
+              Akses layanan publik, pengumuman resmi, informasi transparansi,
+              dan pengetahuan daerah dalam satu portal.
             </p>
-            <div className="flex gap-4 text-gray-500">
-              <Link href="#" className="hover:text-amber-400 transition-colors">
-                <Facebook size={16} />
-              </Link>
-              <Link href="#" className="hover:text-amber-400 transition-colors">
-                <Twitter size={16} />
-              </Link>
-              <Link href="#" className="hover:text-amber-400 transition-colors">
-                <Instagram size={16} />
-              </Link>
-              <Link href="#" className="hover:text-amber-400 transition-colors">
-                <Globe size={16} />
-              </Link>
-            </div>
           </div>
 
-          {/* Kolom 2 - Tentang Kami */}
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm">Tentang Kami</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Profil Provinsi</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Visi & Misi</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Struktur Organisasi</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Sejarah</Link></li>
-            </ul>
-          </div>
-
-          {/* Kolom 3 - Layanan */}
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm">Layanan</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">PPDB Online</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Info Publik</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Sublek</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Survey Kepuasan Masyarakat</Link></li>
-            </ul>
-          </div>
-
-          {/* Kolom 4 - Informasi */}
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm">Informasi</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Berita</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Pengumuman</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Anti Hoax</Link></li>
-              <li><Link href="#" className="hover:text-amber-400 transition-colors">Galeri</Link></li>
-            </ul>
+          <div className="grid gap-8 sm:grid-cols-3">
+            {footerGroups.map((group) => (
+              <div key={group.title}>
+                <h3 className="text-sm font-bold text-white">{group.title}</h3>
+                <ul className="mt-4 space-y-2 text-sm">
+                  {group.links.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-white/68 transition duration-civic hover:text-brand-gold-200"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Bagian Kontak */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-gray-700 pt-10">
-          {/* Alamat */}
-          <div className="flex items-start space-x-3">
-            <div className="p-2 rounded-full bg-amber-500/20">
-              <MapPin className="text-amber-400" size={18} />
-            </div>
+        <div className="grid gap-6 border-b border-white/12 py-8 md:grid-cols-3">
+          <div className="flex items-start gap-3">
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-brand-gold-300" />
             <div>
-              <h4 className="text-white font-semibold mb-1 text-sm">Alamat</h4>
-              <p className="text-xs leading-relaxed text-gray-400">
-                Jl. Jenderal Sudirman No. 51<br />
+              <h4 className="text-sm font-semibold text-white">Alamat</h4>
+              <p className="mt-1 text-sm leading-6 text-white/64">
+                Jl. Jenderal Sudirman No. 51
+                <br />
                 Padang, Sumatera Barat 25112
               </p>
             </div>
           </div>
 
-          {/* Telepon */}
-          <div className="flex items-start space-x-3">
-            <div className="p-2 rounded-full bg-amber-500/20">
-              <Phone className="text-amber-400" size={18} />
-            </div>
+          <div className="flex items-start gap-3">
+            <Phone className="mt-0.5 h-5 w-5 shrink-0 text-brand-gold-300" />
             <div>
-              <h4 className="text-white font-semibold mb-1 text-sm">Telepon</h4>
-              <p className="text-xs leading-relaxed text-gray-400">
-                (0751) 7051711<br />
-                Senin - Jumat, 08:00 - 16:00 WIB
+              <h4 className="text-sm font-semibold text-white">Telepon</h4>
+              <p className="mt-1 text-sm leading-6 text-white/64">
+                (0751) 7051711
+                <br />
+                Senin-Jumat, 08:00-16:00 WIB
               </p>
             </div>
           </div>
 
-          {/* Email */}
-          <div className="flex items-start space-x-3">
-            <div className="p-2 rounded-full bg-amber-500/20">
-              <Mail className="text-amber-400" size={18} />
-            </div>
+          <div className="flex items-start gap-3">
+            <Mail className="mt-0.5 h-5 w-5 shrink-0 text-brand-gold-300" />
             <div>
-              <h4 className="text-white font-semibold mb-1 text-sm">Email</h4>
-              <p className="text-xs leading-relaxed text-gray-400">
-                info@sumbarprov.go.id<br />
+              <h4 className="text-sm font-semibold text-white">Email</h4>
+              <p className="mt-1 text-sm leading-6 text-white/64">
+                info@sumbarprov.go.id
+                <br />
                 humas@sumbarprov.go.id
               </p>
             </div>
           </div>
         </div>
 
-        {/* Footer bawah */}
-        <div className="flex flex-col md:flex-row justify-between items-center mt-10 text-xs text-gray-500 border-t border-gray-700 pt-6">
-          <p>© 2025 Pemerintah Provinsi Sumatera Barat. All rights reserved.</p>
-          <div className="flex gap-6 mt-2 md:mt-0">
-            <Link href="#" className="hover:text-amber-400 transition-colors">Kebijakan Privasi</Link>
-            <Link href="#" className="hover:text-amber-400 transition-colors">Syarat & Ketentuan</Link>
-            <Link href="#" className="hover:text-amber-400 transition-colors">Sitemap</Link>
+        <div className="flex flex-col gap-4 pt-6 text-xs text-white/52 md:flex-row md:items-center md:justify-between">
+          <p>
+            © 2025 Pemerintah Provinsi Sumatera Barat. Seluruh hak cipta
+            dilindungi.
+          </p>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            {/* Pending legal routes: keep disabled until real policy pages exist. */}
+            <span aria-disabled="true">Kebijakan Privasi</span>
+            <span aria-disabled="true">Syarat & Ketentuan</span>
+            <Link
+              href="/informasi"
+              className="transition duration-civic hover:text-brand-gold-200"
+            >
+              Sitemap
+            </Link>
           </div>
         </div>
       </div>

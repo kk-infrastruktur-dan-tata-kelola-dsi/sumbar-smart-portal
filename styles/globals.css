@@ -2,6 +2,181 @@
 
 @config "../tailwind.config.js";
 
+:root {
+  --color-civic-paper: #F8F5ED;
+  --color-civic-paper-warm: #F3EFE4;
+  --color-civic-limestone: #E8E1D4;
+  --color-civic-mist: #F4F6F7;
+  --color-civic-cloud: #FFFFFF;
+  --color-civic-line: #D8D3C8;
+  --color-civic-line-strong: #BEB6A8;
+  --color-civic-text: #18212B;
+  --color-civic-text-muted: #5D6673;
+  --color-civic-text-subtle: #7C8490;
+  --color-civic-footer: #172331;
+  --color-civic-primary: #B77A0B;
+  --color-civic-primary-soft: #FFF8E6;
+  --color-civic-danger: #B92D24;
+  --color-civic-warning: #D69A1B;
+  --color-civic-success: #357F57;
+  --color-civic-info: #277F96;
+  --color-civic-focus: #1F6578;
+  --shadow-civic-xs: 0 1px 2px rgb(24 33 43 / 0.06);
+  --shadow-civic-sm: 0 4px 12px rgb(24 33 43 / 0.08);
+  --shadow-civic-md: 0 12px 28px rgb(24 33 43 / 0.10);
+  --shadow-civic-focus: 0 0 0 3px rgb(31 101 120 / 0.28);
+  --radius-civic: 0.5rem;
+  --radius-civic-lg: 0.75rem;
+  --radius-civic-xl: 1rem;
+  --motion-civic: 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+html {
+  background: var(--color-civic-paper);
+  color: var(--color-civic-text);
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgb(255 248 230 / 0.55), transparent 30rem),
+    var(--color-civic-paper);
+  color: var(--color-civic-text);
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(183 122 11 / 0.24);
+  color: var(--color-civic-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-civic-focus);
+  outline-offset: 3px;
+}
+
+.civic-container {
+  width: min(100% - 3rem, 1200px);
+  margin-inline: auto;
+}
+
+.civic-container-wide {
+  width: min(100% - 3rem, 1320px);
+  margin-inline: auto;
+}
+
+.civic-prose {
+  max-width: 760px;
+}
+
+.civic-tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+.civic-focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition:
+    box-shadow var(--motion-civic),
+    border-color var(--motion-civic),
+    background-color var(--motion-civic),
+    color var(--motion-civic);
+}
+
+.civic-focus-ring:focus-visible {
+  box-shadow: var(--shadow-civic-focus);
+  outline-color: var(--color-civic-focus);
+}
+
+.rumah-gadang-art {
+  --rg-x: 0;
+  --rg-y: 0;
+  --rg-scroll: 0;
+}
+
+.rumah-gadang-art__image {
+  transform:
+    translate3d(
+      calc(var(--rg-x) * 6px),
+      calc((var(--rg-y) * 4px) + (var(--rg-scroll) * -12px)),
+      0
+    )
+    translateX(-20%);
+  transition: transform 120ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes landingReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes immersiveImageEnter {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.landing-reveal {
+  animation: landingReveal 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 28%;
+}
+
+.immersive-image-enter {
+  animation: immersiveImageEnter 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-timeline: view();
+  animation-range: entry 0% cover 35%;
+}
+
+.sumbar-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgb(255 255 255 / 0.65) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgb(18 26 34 / 0.45) 0 1px, transparent 1px);
+  background-size: 18px 18px, 23px 23px;
+  mix-blend-mode: overlay;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rumah-gadang-art__image {
+    animation: immersiveImageEnter 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .landing-reveal,
+  .immersive-image-enter,
+  .rumah-gadang-art__image,
+  .chat-panel-enter,
+  .chat-message-enter,
+  .typing-dot,
+  .typing-cursor {
+    animation: none !important;
+    opacity: 1;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 /* AI Assistant Streaming Animations */
 @keyframes fadeIn {
   from {
@@ -21,10 +196,6 @@
   50% {
     opacity: 0.3;
   }
-}
-
-*{
-  scroll-behavior: smooth;
 }
 
 .animate-in {
@@ -76,22 +247,43 @@
   text-underline-offset: 2px;
 }
 
-/* Shimmer line animation for assistant typing placeholder */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* Chat panel entrance (menu & chat window) */
+@keyframes chatPanelEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.shimmer-line {
-  background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%);
-  background-size: 400% 100%;
-  animation: shimmer 1.2s ease-in-out infinite;
+.chat-panel-enter {
+  transform-origin: bottom right;
+  animation: chatPanelEnter 220ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+/* Individual chat message entrance */
+@keyframes chatMessageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-message-enter {
+  animation: chatMessageEnter 240ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 /* Typing dots animation (used during streaming) */
 @keyframes dotPulse {
-  0%, 100% { transform: translateY(0); opacity: 0.5; }
-  50% { transform: translateY(-2px); opacity: 1; }
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-3px); opacity: 1; }
 }
 
 .typing-dot {
