@@ -1,5 +1,7 @@
 "use client";
 
+import type { AIMessage } from "@/types/ai";
+
 import React from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -18,7 +20,6 @@ import {
 } from "lucide-react";
 
 import { useTTS } from "@/contexts/TTSContext";
-import type { AIMessage } from "@/types/ai";
 
 type Panel = "menu" | "chat" | null;
 type ChatMessage = AIMessage & { id: string };
@@ -141,10 +142,12 @@ export default function AiAssistant() {
 
         if (ct.includes("application/json")) {
           const data = await res.json();
+
           throw new Error(data?.error || data?.details || "Request failed");
         }
 
         const txt = await res.text();
+
         throw new Error(txt || "Request failed");
       }
 
@@ -158,6 +161,7 @@ export default function AiAssistant() {
 
       while (true) {
         const { done, value } = await reader.read();
+
         if (done) break;
 
         acc += decoder.decode(value, { stream: true });
@@ -210,7 +214,7 @@ export default function AiAssistant() {
   const isOpen = panel !== null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50" suppressHydrationWarning>
+    <div suppressHydrationWarning className="fixed bottom-5 right-5 z-50">
       {panel === "menu" && (
         <div className="chat-panel-enter mb-3 w-[min(calc(100vw-2.5rem),360px)] rounded-civic-xl border border-civic-line bg-civic-cloud p-4 shadow-civic-md">
           <div className="mb-4 flex items-start justify-between gap-3">
@@ -224,10 +228,10 @@ export default function AiAssistant() {
             </div>
             <Button
               isIconOnly
+              aria-label="Tutup pusat bantuan"
               size="sm"
               variant="light"
               onPress={closePanel}
-              aria-label="Tutup pusat bantuan"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -235,16 +239,16 @@ export default function AiAssistant() {
 
           <div className="space-y-2">
             <button
+              className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
               type="button"
               onClick={() => setPanel("chat")}
-              className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
             >
               <Image
-                src="/images/tanyomamak.svg"
                 alt=""
-                width={28}
-                height={28}
                 className="h-7 w-7"
+                height={28}
+                src="/images/tanyomamak.svg"
+                width={28}
               />
               <span>
                 <span className="block text-sm font-bold text-civic-text">
@@ -257,10 +261,10 @@ export default function AiAssistant() {
             </button>
 
             <a
-              href="https://forms.gle/AhScbDbK5g8551C59"
-              target="_blank"
-              rel="noopener noreferrer"
               className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+              href="https://forms.gle/AhScbDbK5g8551C59"
+              rel="noopener noreferrer"
+              target="_blank"
             >
               <NotepadText className="h-5 w-5 text-semantic-primary" />
               <span className="min-w-0 flex-1">
@@ -275,9 +279,9 @@ export default function AiAssistant() {
             </a>
 
             <button
+              className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
               type="button"
               onClick={toggleTTS}
-              className="civic-focus-ring flex w-full items-center gap-3 rounded-civic-lg border border-civic-line bg-civic-paper px-3 py-3 text-left transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
             >
               {ttsEnabled ? (
                 <Volume2 className="h-5 w-5 text-semantic-success" />
@@ -303,11 +307,11 @@ export default function AiAssistant() {
           <div className="flex items-start justify-between gap-3 border-b border-civic-line bg-brand-gold-50 px-4 py-4">
             <div className="flex items-start gap-3">
               <Image
-                src="/images/tanyomamak.svg"
                 alt=""
-                width={36}
-                height={36}
                 className="h-9 w-9"
+                height={36}
+                src="/images/tanyomamak.svg"
+                width={36}
               />
               <div>
                 <h3 className="font-bold text-civic-text">Tanyo Mamak</h3>
@@ -317,11 +321,11 @@ export default function AiAssistant() {
               </div>
             </div>
             <Button
-              variant="light"
               isIconOnly
-              size="sm"
-              onPress={closePanel}
               aria-label="Tutup Tanyo Mamak"
+              size="sm"
+              variant="light"
+              onPress={closePanel}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -329,7 +333,7 @@ export default function AiAssistant() {
 
           {error && (
             <div className="px-4 pt-3">
-              <Alert color="danger" variant="flat" className="text-sm">
+              <Alert className="text-sm" color="danger" variant="flat">
                 {error}
               </Alert>
             </div>
@@ -337,21 +341,27 @@ export default function AiAssistant() {
 
           <div
             ref={chatContainerRef}
-            onScroll={handleChatScroll}
             className="flex-1 overflow-auto px-4 py-3"
+            onScroll={handleChatScroll}
           >
             <div className="flex flex-col gap-3">
               {messages.length === 0 && (
                 <div className="rounded-civic-lg border border-civic-line bg-civic-paper p-4">
-                  <p className="text-sm font-semibold text-civic-text" suppressHydrationWarning>
+                  <p
+                    suppressHydrationWarning
+                    className="text-sm font-semibold text-civic-text"
+                  >
                     {greeting}
                   </p>
                   <p className="mt-1 text-sm leading-6 text-civic-textMuted">
                     Saya Mamak. Saya bisa membantu mencari informasi tentang
-                    layanan, keuangan daerah, PPID, budaya, dan pengumuman
-                    resmi Sumatera Barat.
+                    layanan, keuangan daerah, PPID, budaya, dan pengumuman resmi
+                    Sumatera Barat.
                   </p>
-                  <p className="mt-3 text-xs text-civic-textSubtle" suppressHydrationWarning>
+                  <p
+                    suppressHydrationWarning
+                    className="mt-3 text-xs text-civic-textSubtle"
+                  >
                     {timeString ?? ""}
                   </p>
                 </div>
@@ -382,8 +392,8 @@ export default function AiAssistant() {
                         <div>
                           {m.content ? (
                             <div
-                              className="prose prose-sm max-w-none whitespace-pre-wrap"
                               dangerouslySetInnerHTML={{ __html: m.content }}
+                              className="prose prose-sm max-w-none whitespace-pre-wrap"
                             />
                           ) : isStreaming ? (
                             <span
@@ -429,10 +439,10 @@ export default function AiAssistant() {
                 {quickActions.map((action) => (
                   <button
                     key={action.label}
+                    className="civic-focus-ring rounded-civic border border-civic-line bg-civic-cloud px-3 py-2 text-left text-xs font-medium text-civic-text transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={loading}
                     type="button"
                     onClick={() => send(action.text)}
-                    disabled={loading}
-                    className="civic-focus-ring rounded-civic border border-civic-line bg-civic-cloud px-3 py-2 text-left text-xs font-medium text-civic-text transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {action.label}
                   </button>
@@ -443,9 +453,10 @@ export default function AiAssistant() {
 
           <div className="flex items-center gap-2 border-t border-civic-line bg-civic-paper px-4 py-3">
             <input
-              type="text"
               className="civic-focus-ring min-w-0 flex-1 rounded-civic-lg border border-civic-line bg-civic-cloud px-3 py-2 text-sm text-civic-text outline-none placeholder:text-civic-textSubtle disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={loading}
               placeholder="Ketik pertanyaan Anda..."
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -454,27 +465,30 @@ export default function AiAssistant() {
                   send();
                 }
               }}
-              disabled={loading}
             />
             <Button
-              color="primary"
               isIconOnly
+              aria-label="Kirim pertanyaan"
+              color="primary"
+              isDisabled={loading || !input.trim()}
               radius="md"
               onPress={() => send()}
-              isDisabled={loading || !input.trim()}
-              aria-label="Kirim pertanyaan"
             >
-              {loading ? <Spinner size="sm" color="current" /> : <Send className="h-4 w-4" />}
+              {loading ? (
+                <Spinner color="current" size="sm" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
       )}
 
       <Button
+        aria-label={isOpen ? "Tutup pusat bantuan" : "Buka pusat bantuan"}
+        className="h-12 shadow-civic-md"
         color={isOpen ? "default" : "primary"}
         radius="md"
-        onPress={() => (isOpen ? closePanel() : setPanel("menu"))}
-        className="h-12 shadow-civic-md"
         startContent={
           isOpen ? (
             <X className="h-5 w-5" />
@@ -484,7 +498,7 @@ export default function AiAssistant() {
             <MessageCircle className="h-5 w-5" />
           )
         }
-        aria-label={isOpen ? "Tutup pusat bantuan" : "Buka pusat bantuan"}
+        onPress={() => (isOpen ? closePanel() : setPanel("menu"))}
       >
         {isOpen ? "Tutup" : "Bantuan"}
       </Button>

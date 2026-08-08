@@ -246,11 +246,36 @@ export const keuanganData = {
   },
 
   trendAnggaran: [
-    { year: "2021", anggaran: "9.5 T", realisasi: "8.5 T", persentase: "89.7%" },
-    { year: "2022", anggaran: "10.2 T", realisasi: "9.3 T", persentase: "91.3%" },
-    { year: "2023", anggaran: "10.9 T", realisasi: "10.1 T", persentase: "92.5%" },
-    { year: "2024", anggaran: "11.8 T", realisasi: "11.1 T", persentase: "94.2%" },
-    { year: "2025", anggaran: "12.5 T", realisasi: "4.5 T", persentase: "35.8%" },
+    {
+      year: "2021",
+      anggaran: "9.5 T",
+      realisasi: "8.5 T",
+      persentase: "89.7%",
+    },
+    {
+      year: "2022",
+      anggaran: "10.2 T",
+      realisasi: "9.3 T",
+      persentase: "91.3%",
+    },
+    {
+      year: "2023",
+      anggaran: "10.9 T",
+      realisasi: "10.1 T",
+      persentase: "92.5%",
+    },
+    {
+      year: "2024",
+      anggaran: "11.8 T",
+      realisasi: "11.1 T",
+      persentase: "94.2%",
+    },
+    {
+      year: "2025",
+      anggaran: "12.5 T",
+      realisasi: "4.5 T",
+      persentase: "35.8%",
+    },
   ],
 };
 
@@ -333,7 +358,8 @@ export const layananDigital = [
   {
     name: "PPID (Pejabat Pengelola Informasi dan Dokumentasi)",
     slug: "ppid",
-    description: "Platform akses informasi publik sesuai UU Keterbukaan Informasi Publik. Masyarakat dapat mengakses dokumen publik dan mengajukan permintaan informasi.",
+    description:
+      "Platform akses informasi publik sesuai UU Keterbukaan Informasi Publik. Masyarakat dapat mengakses dokumen publik dan mengajukan permintaan informasi.",
     fitur: [
       "Akses dokumen publik",
       "Permintaan informasi",
@@ -346,7 +372,8 @@ export const layananDigital = [
   {
     name: "Aplikasi E-Riset",
     slug: "e-riset",
-    description: "Platform penelitian elektronik yang menyediakan database hasil penelitian dari berbagai perguruan tinggi, lembaga penelitian, dan OPD. Memfasilitasi kolaborasi antara peneliti dan institusi.",
+    description:
+      "Platform penelitian elektronik yang menyediakan database hasil penelitian dari berbagai perguruan tinggi, lembaga penelitian, dan OPD. Memfasilitasi kolaborasi antara peneliti dan institusi.",
     fitur: [
       "Database 500+ hasil penelitian",
       "120+ peneliti aktif terdaftar",
@@ -400,7 +427,8 @@ export const destinasiContoh = [
     kategori: "Objek Wisata",
     rating: 4.8,
     reviewCount: 2450,
-    description: "Ikon kota Bukittinggi yang menjadi landmark terkenal. Menara jam bergaya Belanda dengan atap khas Minangkabau.",
+    description:
+      "Ikon kota Bukittinggi yang menjadi landmark terkenal. Menara jam bergaya Belanda dengan atap khas Minangkabau.",
     lokasi: "Jl. Jam Gadang, Benteng Ps. Atas, Guguk Panjang, Kota Bukittinggi",
     tags: ["Landmark", "Sejarah", "Fotografi"],
   },
@@ -410,7 +438,8 @@ export const destinasiContoh = [
     kategori: "Objek Wisata",
     rating: 4.9,
     reviewCount: 1876,
-    description: "Lembah curam dengan pemandangan spektakuler. Canyon hijau dengan kedalaman hingga 100 meter.",
+    description:
+      "Lembah curam dengan pemandangan spektakuler. Canyon hijau dengan kedalaman hingga 100 meter.",
     lokasi: "Panorama, Kecamatan IV Koto, Kabupaten Agam",
     tags: ["Alam", "Pemandangan", "Adventure"],
   },
@@ -420,7 +449,8 @@ export const destinasiContoh = [
     kategori: "Objek Wisata",
     rating: 4.7,
     reviewCount: 1653,
-    description: "Istana kerajaan Minangkabau yang megah dengan arsitektur rumah gadang khas.",
+    description:
+      "Istana kerajaan Minangkabau yang megah dengan arsitektur rumah gadang khas.",
     lokasi: "Batusangkar, Kabupaten Tanah Datar",
     tags: ["Budaya", "Sejarah", "Arsitektur"],
   },
@@ -430,7 +460,8 @@ export const destinasiContoh = [
     kategori: "Objek Wisata",
     rating: 4.6,
     reviewCount: 1234,
-    description: "Pantai indah dengan pulau kecil dan jembatan gantung. Cocok untuk keluarga.",
+    description:
+      "Pantai indah dengan pulau kecil dan jembatan gantung. Cocok untuk keluarga.",
     lokasi: "Painan, Kabupaten Pesisir Selatan",
     tags: ["Pantai", "Keluarga", "Sunset"],
   },
@@ -440,7 +471,8 @@ export const destinasiContoh = [
     kategori: "Kuliner",
     rating: 5.0,
     reviewCount: 3892,
-    description: "Masakan daging sapi berbumbu rempah yang dimasak berjam-jam hingga bumbu meresap.",
+    description:
+      "Masakan daging sapi berbumbu rempah yang dimasak berjam-jam hingga bumbu meresap.",
     tags: ["Makanan Utama", "Pedas", "Santan"],
   },
   {
@@ -460,16 +492,23 @@ export const destinasiContoh = [
 
 export function getKeuanganByYear(year: string) {
   const yearKey = year as keyof typeof keuanganData.statisticsByYear;
+
   return {
-    statistik: keuanganData.statisticsByYear[yearKey] || keuanganData.statisticsByYear["2025"],
+    statistik:
+      keuanganData.statisticsByYear[yearKey] ||
+      keuanganData.statisticsByYear["2025"],
     laporan: keuanganData.laporanKeuangan.filter((l) => l.year === year),
-    belanja: keuanganData.realisasiBelanja[yearKey] || keuanganData.realisasiBelanja["2025"],
+    belanja:
+      keuanganData.realisasiBelanja[yearKey] ||
+      keuanganData.realisasiBelanja["2025"],
   };
 }
 
 export function getKabupatenByName(name: string) {
   return kabupatenData.find(
-    (k) => k.name.toLowerCase().includes(name.toLowerCase()) || k.slug.includes(name.toLowerCase())
+    (k) =>
+      k.name.toLowerCase().includes(name.toLowerCase()) ||
+      k.slug.includes(name.toLowerCase()),
   );
 }
 

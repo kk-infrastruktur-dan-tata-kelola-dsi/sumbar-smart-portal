@@ -106,7 +106,11 @@ const newsItems = [
 ];
 
 const cultureLinks = [
-  { label: "Budaya Sumbar", href: "/budaya", icon: <Map className="h-4 w-4" /> },
+  {
+    label: "Budaya Sumbar",
+    href: "/budaya",
+    icon: <Map className="h-4 w-4" />,
+  },
   {
     label: "Foto daerah",
     href: "/informasi/foto",
@@ -121,13 +125,15 @@ const cultureLinks = [
 
 export default function Home() {
   return (
-    <PageShell width="wide" className="bg-civic-paper" innerClassName="py-0!">
+    <PageShell className="bg-civic-paper" innerClassName="py-0!" width="wide">
       <section className="relative left-1/2 isolate min-h-[calc(92dvh-4rem)] w-screen -translate-x-1/2 overflow-hidden bg-civic-paper">
         <RumahGadangHeroArt />
         <div className="absolute inset-x-0 bottom-0 z-[1] h-40 bg-gradient-to-t from-civic-paper via-civic-paper/92 to-transparent" />
         <div className="relative z-10 mx-auto flex min-h-[calc(92dvh-4rem)] max-w-civic-wide items-center px-6 pb-24 pt-16 sm:px-8 lg:px-10">
           <div className="max-w-3xl landing-reveal lg:max-w-[46rem]">
-            <StatusBadge variant="official">Portal resmi Provinsi Sumatera Barat</StatusBadge>
+            <StatusBadge variant="official">
+              Portal resmi Provinsi Sumatera Barat
+            </StatusBadge>
             <h1 className="mt-5 max-w-4xl text-balance text-4xl font-extrabold leading-[1.04] text-civic-text md:text-6xl">
               Akses layanan dan informasi publik Sumatera Barat
             </h1>
@@ -144,15 +150,15 @@ export default function Home() {
                 <Search className="h-5 w-5 shrink-0 text-civic-textSubtle" />
                 <span className="sr-only">Cari layanan atau informasi</span>
                 <input
-                  name="q"
-                  type="search"
-                  placeholder="Cari layanan, pengumuman, dokumen..."
                   className="w-full bg-transparent py-3 text-sm text-civic-text outline-none placeholder:text-civic-textSubtle"
+                  name="q"
+                  placeholder="Cari layanan, pengumuman, dokumen..."
+                  type="search"
                 />
               </label>
               <button
-                type="submit"
                 className="civic-focus-ring inline-flex items-center justify-center gap-2 rounded-civic-lg bg-semantic-primary px-5 py-3 text-sm font-bold text-white transition duration-civic hover:bg-brand-gold-600"
+                type="submit"
               >
                 Cari <ArrowRight className="h-4 w-4" />
               </button>
@@ -160,20 +166,20 @@ export default function Home() {
 
             <div className="mt-5 flex flex-wrap gap-3">
               <Link
-                href="/pengumuman"
                 className="civic-focus-ring rounded-civic border border-civic-line bg-civic-cloud/96 px-4 py-2 text-sm font-semibold text-civic-text hover:border-brand-gold-300 hover:bg-brand-gold-50"
+                href="/pengumuman"
               >
                 Pengumuman resmi
               </Link>
               <Link
-                href="/keuangan"
                 className="civic-focus-ring rounded-civic border border-civic-line bg-civic-cloud/96 px-4 py-2 text-sm font-semibold text-civic-text hover:border-brand-gold-300 hover:bg-brand-gold-50"
+                href="/keuangan"
               >
                 Keuangan daerah
               </Link>
               <Link
-                href="/anti_hoax"
                 className="civic-focus-ring rounded-civic border border-brand-gold-300 bg-brand-gold-50 px-4 py-2 text-sm font-bold text-brand-gold-800 hover:bg-brand-gold-100"
+                href="/anti_hoax"
               >
                 Anti Hoax
               </Link>
@@ -184,9 +190,9 @@ export default function Home() {
 
       <section className="sumbar-grain relative left-1/2 -mt-14 min-h-[74vh] w-screen -translate-x-1/2 overflow-hidden pb-16 pt-28 text-civic-inverse md:pb-20 md:pt-32">
         <ImmersiveMedia
+          priority
           image="green-valley"
           imgClassName="max-md:[object-position:52%_center] md:[object-position:center_center]"
-          priority
         />
         <div className="absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(248,245,237,0.94)_0%,rgba(23,35,49,0.92)_20%,rgba(23,35,49,0.88)_60%,rgba(23,35,49,0.82)_100%)]" />
         <div className="absolute inset-x-0 top-0 z-[2] h-32 bg-gradient-to-b from-civic-paper via-civic-paper/60 to-transparent" />
@@ -196,21 +202,22 @@ export default function Home() {
               Layanan prioritas
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#B8C0CB] md:text-base">
-              Akses yang paling sering dibutuhkan warga ditempatkan di depan, dengan rute langsung dan label yang jelas.
+              Akses yang paling sering dibutuhkan warga ditempatkan di depan,
+              dengan rute langsung dan label yang jelas.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {priorityServices.map((service) => (
               <ActionCard
                 key={service.href}
-                title={service.title}
+                actionLabel="Buka"
+                className="bg-civic-cloud/98 shadow-[0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-sm"
                 description={service.description}
                 href={service.href}
                 icon={service.icon}
                 status={service.status}
                 statusVariant={service.statusVariant ?? "official"}
-                actionLabel="Buka"
-                className="bg-civic-cloud/98 shadow-[0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-sm"
+                title={service.title}
               />
             ))}
           </div>
@@ -218,9 +225,9 @@ export default function Home() {
       </section>
 
       <Section
-        title="Informasi resmi"
-        description="Pengumuman dan berita ditampilkan sebagai jalur resmi, bukan kartu promosi."
         className="py-6"
+        description="Pengumuman dan berita ditampilkan sebagai jalur resmi, bukan kartu promosi."
+        title="Informasi resmi"
       >
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="flex flex-col rounded-civic-xl border border-civic-line bg-civic-cloud p-5 shadow-civic-xs">
@@ -234,8 +241,8 @@ export default function Home() {
                 </h3>
               </div>
               <Link
-                href="/pengumuman"
                 className="civic-focus-ring rounded-civic px-2 py-1 text-sm font-bold text-semantic-primary hover:bg-brand-gold-50"
+                href="/pengumuman"
               >
                 Lihat semua
               </Link>
@@ -243,9 +250,9 @@ export default function Home() {
             <div className="flex flex-1 flex-col gap-3">
               {officialUpdates.map((item) => (
                 <Link
-                  href={item.href}
                   key={item.title}
                   className="civic-focus-ring flex flex-1 flex-col justify-center rounded-civic-lg border border-civic-line bg-civic-paper p-4 transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+                  href={item.href}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <h4 className="font-bold leading-snug text-civic-text">
@@ -253,7 +260,9 @@ export default function Home() {
                     </h4>
                     <StatusBadge variant="official">{item.label}</StatusBadge>
                   </div>
-                  <p className="mt-2 text-sm text-civic-textSubtle">{item.date}</p>
+                  <p className="mt-2 text-sm text-civic-textSubtle">
+                    {item.date}
+                  </p>
                 </Link>
               ))}
             </div>
@@ -270,8 +279,8 @@ export default function Home() {
                 </h3>
               </div>
               <Link
-                href="/informasi/berita"
                 className="civic-focus-ring rounded-civic px-2 py-1 text-sm font-bold text-semantic-primary hover:bg-brand-gold-50"
+                href="/informasi/berita"
               >
                 Semua berita
               </Link>
@@ -279,9 +288,9 @@ export default function Home() {
             <div className="flex flex-1 flex-col gap-3">
               {newsItems.map((item) => (
                 <Link
-                  href={item.href}
                   key={item.title}
                   className="civic-focus-ring flex flex-1 flex-col justify-center rounded-civic-lg border border-civic-line bg-civic-paper p-4 transition duration-civic hover:border-brand-rantau-200 hover:bg-brand-rantau-50"
+                  href={item.href}
                 >
                   <p className="text-sm font-semibold text-semantic-info">
                     {item.source}
@@ -289,7 +298,9 @@ export default function Home() {
                   <h4 className="mt-2 text-lg font-bold leading-snug text-civic-text">
                     {item.title}
                   </h4>
-                  <p className="mt-2 text-sm text-civic-textSubtle">{item.date}</p>
+                  <p className="mt-2 text-sm text-civic-textSubtle">
+                    {item.date}
+                  </p>
                 </Link>
               ))}
             </div>
@@ -299,8 +310,8 @@ export default function Home() {
 
       <section className="relative left-1/2 min-h-[78vh] w-screen -translate-x-1/2 overflow-hidden bg-civic-paper py-16 md:py-20">
         <ImmersiveMedia
-          image="rice-terraces"
           className="opacity-80"
+          image="rice-terraces"
           imgClassName="max-md:[object-position:64%_center] md:[object-position:58%_center]"
         />
         <div className="absolute inset-0 z-[1] bg-[linear-gradient(90deg,rgba(248,245,237,0.98)_0%,rgba(248,245,237,0.94)_40%,rgba(248,245,237,0.52)_68%,rgba(248,245,237,0.22)_100%)]" />
@@ -312,40 +323,41 @@ export default function Home() {
               Transparansi dan dokumen
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#6B7280] md:text-base">
-              Akses dokumen dan laporan penting dengan konteks sumber yang jelas.
+              Akses dokumen dan laporan penting dengan konteks sumber yang
+              jelas.
             </p>
           </div>
           <div className="mt-8 grid max-w-5xl gap-4 lg:grid-cols-3">
             <DocumentCard
-              title="Keuangan Daerah"
-              description="Ringkasan APBD, realisasi, laporan, dan tren anggaran."
-              href="/keuangan"
-              fileType="Dashboard"
-              source="Pemprov Sumbar"
-              icon={<Landmark className="h-5 w-5" />}
               actionLabel="Lihat"
-              status="Transparansi"
               className="bg-civic-cloud/96 shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm"
-            />
-            <DocumentCard
-              title="Pedoman teknis"
-              description="Dokumen panduan dan informasi teknis layanan publik."
-              href="/informasi#pedoman-teknis"
-              fileType="Dokumen"
+              description="Ringkasan APBD, realisasi, laporan, dan tren anggaran."
+              fileType="Dashboard"
+              href="/keuangan"
+              icon={<Landmark className="h-5 w-5" />}
               source="Pemprov Sumbar"
-              actionLabel="Buka"
-              status="PPID"
-              className="bg-civic-cloud/96 shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+              status="Transparansi"
+              title="Keuangan Daerah"
             />
             <DocumentCard
-              title="Manual SKM"
-              description="Panduan penggunaan Survey Kepuasan Masyarakat."
-              href="/file/SEPAKAT - Manual Book.pdf"
-              fileType="PDF"
-              source="SEPAKAT"
-              actionLabel="Unduh"
-              status="Layanan"
+              actionLabel="Buka"
               className="bg-civic-cloud/96 shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+              description="Dokumen panduan dan informasi teknis layanan publik."
+              fileType="Dokumen"
+              href="/informasi#pedoman-teknis"
+              source="Pemprov Sumbar"
+              status="PPID"
+              title="Pedoman teknis"
+            />
+            <DocumentCard
+              actionLabel="Unduh"
+              className="bg-civic-cloud/96 shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+              description="Panduan penggunaan Survey Kepuasan Masyarakat."
+              fileType="PDF"
+              href="/file/SEPAKAT - Manual Book.pdf"
+              source="SEPAKAT"
+              status="Layanan"
+              title="Manual SKM"
             />
           </div>
         </div>
@@ -364,15 +376,16 @@ export default function Home() {
               Budaya dan wilayah
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#B8C0CB] md:text-base">
-              Konteks lokal ditampilkan sebagai pengetahuan daerah yang dapat dijelajahi, bukan sekadar ornamen.
+              Konteks lokal ditampilkan sebagai pengetahuan daerah yang dapat
+              dijelajahi, bukan sekadar ornamen.
             </p>
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cultureLinks.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
                 className="civic-focus-ring group rounded-civic-xl border border-white/12 bg-white/[0.08] p-6 backdrop-blur-sm transition duration-civic hover:border-brand-gold-400/40 hover:bg-white/[0.14]"
+                href={item.href}
               >
                 <span className="flex h-11 w-11 items-center justify-center rounded-civic-lg bg-brand-gold-500/20 text-brand-gold-300 transition duration-civic group-hover:bg-brand-gold-500/30 group-hover:text-brand-gold-200">
                   {item.icon}

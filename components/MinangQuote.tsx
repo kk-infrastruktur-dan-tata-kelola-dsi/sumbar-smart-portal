@@ -21,7 +21,7 @@ export default function MinangQuote() {
     const interval = setInterval(() => {
       // Fade out
       setIsVisible(false);
-      
+
       // Change quote after fade out
       setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % minangQuotes.length);

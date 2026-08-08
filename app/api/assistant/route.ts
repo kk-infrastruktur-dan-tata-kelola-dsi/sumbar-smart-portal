@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+
 import {
   keuanganData,
   kabupatenData,
@@ -27,11 +28,12 @@ type RequestBody = {
 
 // Use models actually available for this API key (verified via ListModels)
 // Your key has Gemini 2.5 and 2.0, but NOT 1.5
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const MODEL_FALLBACKS = [
   "gemini-flash-latest",
-  "gemini-2.0-flash",
+  "gemini-3.5-flash-lite",
   "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
   "gemini-2.0-flash-lite",
 ];
 
@@ -59,13 +61,15 @@ function getClientIdentifier(req: Request): string {
 
   const firstForwardedIp = forwardedFor?.split(",")[0]?.trim();
   const firstVercelForwardedIp = vercelForwardedFor?.split(",")[0]?.trim();
-  const ip = cfConnectingIp || realIp || firstForwardedIp || firstVercelForwardedIp;
+  const ip =
+    cfConnectingIp || realIp || firstForwardedIp || firstVercelForwardedIp;
 
   if (ip) {
     return `ip:${ip}`;
   }
 
   const userAgent = req.headers.get("user-agent")?.slice(0, 120) || "unknown";
+
   return `ua:${userAgent}`;
 }
 
@@ -85,7 +89,9 @@ function checkRateLimit(req: Request) {
 
   if (!current || current.resetAt <= now) {
     const resetAt = now + RATE_LIMIT_WINDOW_MS;
+
     rateLimitStore.set(clientId, { count: 1, resetAt });
+
     return {
       allowed: true,
       limit: RATE_LIMIT_MAX_REQUESTS,
@@ -130,12 +136,17 @@ function extractGeminiStatusCode(err: unknown, message: string): number | null {
     maybe?.statusCode ??
     maybe?.response?.status ??
     maybe?.cause?.status;
+
   if (typeof directStatus === "number") return directStatus;
 
   const bracketStatusMatch = message.match(/\[(\d{3})[^\]]*\]/);
+
   if (bracketStatusMatch) return Number(bracketStatusMatch[1]);
 
-  const textStatusMatch = message.match(/\bstatus(?:\s*code)?\s*[:=]\s*(\d{3})\b/i);
+  const textStatusMatch = message.match(
+    /\bstatus(?:\s*code)?\s*[:=]\s*(\d{3})\b/i,
+  );
+
   if (textStatusMatch) return Number(textStatusMatch[1]);
 
   return null;
@@ -143,7 +154,11 @@ function extractGeminiStatusCode(err: unknown, message: string): number | null {
 
 function mapGeminiError(err: unknown): GeminiErrorResponse {
   const rawMessage =
-    err instanceof Error ? err.message : typeof err === "string" ? err : "Unknown Gemini API error";
+    err instanceof Error
+      ? err.message
+      : typeof err === "string"
+        ? err
+        : "Unknown Gemini API error";
   const statusCode = extractGeminiStatusCode(err, rawMessage);
 
   if (statusCode === 400) {
@@ -167,7 +182,8 @@ function mapGeminiError(err: unknown): GeminiErrorResponse {
     return {
       status: 503,
       error: "Gemini quota exceeded",
-      details: "Gemini API quota/rate limit exceeded. Try again later or increase quota.",
+      details:
+        "Gemini API quota/rate limit exceeded. Try again later or increase quota.",
     };
   }
 
@@ -191,7 +207,7 @@ function mapGeminiError(err: unknown): GeminiErrorResponse {
  */
 function formatDataForAI(): string {
   const summary = getAISummary();
-  
+
   let context = `
 === DATA AKTUAL DARI PROJECT ===
 
@@ -212,9 +228,13 @@ function formatDataForAI(): string {
     stats.forEach((stat) => {
       context += `  - ${stat.description}: ${stat.value} (${stat.label})\n`;
     });
-    
+
     // Realisasi belanja
-    const belanja = keuanganData.realisasiBelanja[year as keyof typeof keuanganData.realisasiBelanja];
+    const belanja =
+      keuanganData.realisasiBelanja[
+        year as keyof typeof keuanganData.realisasiBelanja
+      ];
+
     if (belanja) {
       context += `  Realisasi Belanja ${year}:\n`;
       belanja.forEach((b: { category: string; percentage: number }) => {
@@ -268,11 +288,13 @@ function formatDataForAI(): string {
 
 export async function POST(req: Request) {
   const rateLimit = checkRateLimit(req);
+
   if (!rateLimit.allowed) {
     return NextResponse.json(
       {
         error: "Too many requests",
-        details: "Rate limit exceeded. Please wait before sending another request.",
+        details:
+          "Rate limit exceeded. Please wait before sending another request.",
         retry_after_seconds: rateLimit.retryAfterSeconds,
       },
       {
@@ -289,35 +311,42 @@ export async function POST(req: Request) {
 
   try {
     const apiKey = process.env.GEMINI_API_KEY;
+
     if (!apiKey) {
       return NextResponse.json(
         { error: "GEMINI_API_KEY is not set on the server" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     let body: RequestBody;
+
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid JSON body" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const { messages, prompt, model = DEFAULT_MODEL, stream = false, currentPage = "/" } = body;
+    const {
+      messages,
+      prompt,
+      model = DEFAULT_MODEL,
+      stream = false,
+      currentPage = "/",
+    } = body;
 
     // Prefer prompt; fallback to last user message if messages are provided
     let finalPrompt = (prompt ?? "").trim();
+
     if (!finalPrompt && Array.isArray(messages) && messages.length > 0) {
       const lastUser = [...messages].reverse().find((m) => m.role === "user");
+
       finalPrompt = (lastUser?.content ?? "").trim();
     }
     if (!finalPrompt) {
       return NextResponse.json(
         { error: "Provide a 'prompt' or at least one user message" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -619,7 +648,7 @@ Sekarang jawab pertanyaan user dengan konteks di atas: "${finalPrompt}"`;
 
     // Use official Google Generative AI SDK
     const genAI = new GoogleGenerativeAI(apiKey);
-    
+
     // Try requested model with fallbacks
     const modelsToTry = uniqueModels([model, ...MODEL_FALLBACKS]);
     let geminiModel = null;
@@ -641,7 +670,7 @@ Sekarang jawab pertanyaan user dengan konteks di atas: "${finalPrompt}"`;
           error: "Gemini API error",
           details: lastError?.message || "No compatible model found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -651,12 +680,13 @@ Sekarang jawab pertanyaan user dengan konteks di atas: "${finalPrompt}"`;
         // Build the model content request with system context
         const result = await geminiModel.generateContentStream(systemContext);
         const encoder = new TextEncoder();
-        
+
         const streamBody = new ReadableStream<Uint8Array>({
           async start(controller) {
             try {
               for await (const chunk of result.stream) {
                 const text = chunk.text();
+
                 if (text) {
                   controller.enqueue(encoder.encode(text));
                 }
@@ -676,9 +706,10 @@ Sekarang jawab pertanyaan user dengan konteks di atas: "${finalPrompt}"`;
         });
       } catch (err: any) {
         const providerError = mapGeminiError(err);
+
         return NextResponse.json(
           { error: providerError.error, details: providerError.details },
-          { status: providerError.status }
+          { status: providerError.status },
         );
       }
     }
@@ -694,15 +725,19 @@ Sekarang jawab pertanyaan user dengan konteks di atas: "${finalPrompt}"`;
       });
     } catch (err: any) {
       const providerError = mapGeminiError(err);
+
       return NextResponse.json(
         { error: providerError.error, details: providerError.details },
-        { status: providerError.status }
+        { status: providerError.status },
       );
     }
   } catch (err: any) {
     return NextResponse.json(
-      { error: "Unexpected server error", details: String(err?.message || err) },
-      { status: 500 }
+      {
+        error: "Unexpected server error",
+        details: String(err?.message || err),
+      },
+      { status: 500 },
     );
   }
 }
@@ -715,12 +750,15 @@ export async function GET() {
 function uniqueModels(models: (string | undefined)[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
+
   for (const m of models) {
     if (!m) continue;
     const v = m.trim();
+
     if (!v || seen.has(v)) continue;
     seen.add(v);
     out.push(v);
   }
+
   return out;
 }

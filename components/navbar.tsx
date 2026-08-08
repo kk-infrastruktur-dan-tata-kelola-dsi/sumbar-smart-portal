@@ -38,6 +38,7 @@ function isGroupActive(group: NavigationGroup, pathname: string) {
   return Boolean(
     group.items?.some((item) => {
       const href = item.href.split("#")[0];
+
       return href === "/" ? pathname === "/" : pathname.startsWith(href);
     }),
   );
@@ -90,15 +91,15 @@ export const Navbar = () => {
       )}
     >
       <HeroUINavbar
-        maxWidth="full"
-        isMenuOpen={isMenuOpen}
-        onMenuOpenChange={setIsMenuOpen}
         classNames={{
           base: "bg-transparent",
           wrapper: "mx-auto h-16 max-w-civic-wide px-4 sm:px-6 lg:px-10",
         }}
+        isMenuOpen={isMenuOpen}
+        maxWidth="full"
+        onMenuOpenChange={setIsMenuOpen}
       >
-        <NavbarContent justify="start" className="gap-3">
+        <NavbarContent className="gap-3" justify="start">
           <NavbarMenuToggle
             className="lg:hidden"
             icon={() => <Menu className="h-5 w-5" />}
@@ -106,15 +107,15 @@ export const Navbar = () => {
 
           <NavbarBrand className="min-w-0 gap-3">
             <Image
-              src={logoImage}
+              priority
               alt="Logo Provinsi Sumatera Barat"
               className="h-10 w-auto shrink-0"
-              priority
+              src={logoImage}
             />
             <div className="min-w-0">
               <NextLink
-                href="/"
                 className="block truncate text-sm font-extrabold leading-tight text-civic-text sm:text-base"
+                href="/"
               >
                 {siteConfig.name}
               </NextLink>
@@ -125,7 +126,7 @@ export const Navbar = () => {
           </NavbarBrand>
         </NavbarContent>
 
-        <NavbarContent justify="center" className="hidden gap-1 lg:flex">
+        <NavbarContent className="hidden gap-1 lg:flex" justify="center">
           {navigationGroups.map((group) => {
             const active = mounted && isGroupActive(group, pathname);
 
@@ -135,12 +136,12 @@ export const Navbar = () => {
                   <NavbarItem>
                     <DropdownTrigger>
                       <Button
-                        variant="light"
-                        endContent={<ChevronDown className="h-4 w-4" />}
                         className={clsx(
                           "h-10 rounded-civic px-3 text-sm font-semibold text-civic-textMuted transition duration-civic data-[hover=true]:bg-brand-gold-50 data-[hover=true]:text-civic-text",
                           active && "bg-brand-gold-50 text-semantic-primary",
                         )}
+                        endContent={<ChevronDown className="h-4 w-4" />}
+                        variant="light"
                       >
                         {group.name}
                       </Button>
@@ -155,12 +156,12 @@ export const Navbar = () => {
                     {group.items.map((item) => (
                       <DropdownItem
                         key={item.href}
-                        href={item.href}
-                        description={item.description}
                         className={clsx(
                           pathname === item.href.split("#")[0] &&
                             "text-semantic-primary",
                         )}
+                        description={item.description}
+                        href={item.href}
                       >
                         {item.name}
                       </DropdownItem>
@@ -173,11 +174,11 @@ export const Navbar = () => {
             return (
               <NavbarItem key={group.name}>
                 <NextLink
-                  href={group.href ?? "/"}
                   className={clsx(
                     "civic-focus-ring rounded-civic px-3 py-2 text-sm font-semibold text-civic-textMuted transition duration-civic hover:bg-brand-gold-50 hover:text-civic-text",
                     active && "bg-brand-gold-50 text-semantic-primary",
                   )}
+                  href={group.href ?? "/"}
                 >
                   {group.name}
                 </NextLink>
@@ -186,11 +187,11 @@ export const Navbar = () => {
           })}
         </NavbarContent>
 
-        <NavbarContent justify="end" className="hidden sm:flex">
+        <NavbarContent className="hidden sm:flex" justify="end">
           <NavbarItem>
             <NextLink
-              href="/informasi"
               className="civic-focus-ring inline-flex h-10 items-center gap-2 rounded-civic border border-civic-line bg-civic-cloud px-3 text-sm font-semibold text-civic-text transition duration-civic hover:border-brand-gold-300 hover:bg-brand-gold-50"
+              href="/informasi"
             >
               <Search className="h-4 w-4" />
               Cari informasi
@@ -208,8 +209,8 @@ export const Navbar = () => {
                 {priorityMobileLinks.map((item) => (
                   <NextLink
                     key={item.href}
-                    href={item.href}
                     className="civic-focus-ring rounded-civic border border-civic-line bg-civic-paper px-3 py-2 text-sm font-semibold text-civic-text hover:border-brand-gold-300 hover:bg-brand-gold-50"
+                    href={item.href}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
@@ -225,8 +226,8 @@ export const Navbar = () => {
                 <div key={group.name}>
                   {group.href && !group.items?.length ? (
                     <NextLink
-                      href={group.href}
                       className="block rounded-civic px-2 py-2 text-base font-bold text-civic-text"
+                      href={group.href}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {group.name}
@@ -240,8 +241,8 @@ export const Navbar = () => {
                         {group.items?.map((item) => (
                           <NextLink
                             key={item.href}
-                            href={item.href}
                             className="rounded-civic px-3 py-2 text-sm font-medium text-civic-textMuted hover:bg-brand-gold-50 hover:text-civic-text"
+                            href={item.href}
                             onClick={() => setIsMenuOpen(false)}
                           >
                             {item.name}

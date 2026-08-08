@@ -7,6 +7,7 @@ export function RumahGadangHeroArt() {
 
   React.useEffect(() => {
     const root = rootRef.current;
+
     if (!root) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -14,6 +15,7 @@ export function RumahGadangHeroArt() {
 
     if (reducedMotion.matches) {
       root.dataset.motion = "reduced";
+
       return;
     }
 
@@ -35,6 +37,7 @@ export function RumahGadangHeroArt() {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         const scroll = Math.min(1, Math.max(0, window.scrollY / 760));
+
         setVars(x, y, scroll);
       });
     };
@@ -45,6 +48,7 @@ export function RumahGadangHeroArt() {
         const scroll = Math.min(1, Math.max(0, window.scrollY / 760));
         const currentX = Number(root.style.getPropertyValue("--rg-x")) || 0;
         const currentY = Number(root.style.getPropertyValue("--rg-y")) || 0;
+
         setVars(currentX, currentY, scroll);
       });
     };
@@ -68,11 +72,11 @@ export function RumahGadangHeroArt() {
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_42%,rgba(183,122,11,0.13),transparent_34rem),linear-gradient(90deg,rgba(248,245,237,0.96)_0%,rgba(248,245,237,0.82)_32%,rgba(248,245,237,0.18)_58%,rgba(248,245,237,0.52)_100%)]" />
       <img
-        src="/images/sumatera-barat/rumah_gadang_line_immersive_transparent.svg"
         alt=""
+        className="rumah-gadang-art__image absolute bottom-[-6%] left-1/2 h-[64vh] min-h-[360px] w-[1680px] max-w-none -translate-x-[20%] object-contain opacity-90 mix-blend-multiply sm:h-[70vh] md:bottom-[-4%] md:h-[80vh] md:w-[1920px] md:-translate-x-[18%] lg:h-[88vh] lg:w-[2100px] lg:-translate-x-[14%]"
         decoding="async"
         fetchPriority="high"
-        className="rumah-gadang-art__image absolute bottom-[-6%] left-1/2 h-[64vh] min-h-[360px] w-[1680px] max-w-none -translate-x-[20%] object-contain opacity-90 mix-blend-multiply sm:h-[70vh] md:bottom-[-4%] md:h-[80vh] md:w-[1920px] md:-translate-x-[18%] lg:h-[88vh] lg:w-[2100px] lg:-translate-x-[14%]"
+        src="/images/sumatera-barat/rumah_gadang_line_immersive_transparent.svg"
       />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-civic-paper via-civic-paper/84 to-transparent" />
       <div className="absolute inset-y-0 left-0 w-[44vw] bg-gradient-to-r from-civic-paper via-civic-paper/90 to-transparent" />

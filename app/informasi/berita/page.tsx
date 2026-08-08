@@ -1,33 +1,41 @@
 import { Newspaper } from "lucide-react";
 
 import { ContentCard } from "@/components/content";
-import { EmptyState, PageHeader, PageShell, Section, StatusBadge } from "@/components/ui";
+import {
+  EmptyState,
+  PageHeader,
+  PageShell,
+  Section,
+  StatusBadge,
+} from "@/components/ui";
 import { newsItems } from "@/config/content-data";
 
 export default function BeritaPage() {
   return (
     <PageShell as="main">
       <PageHeader
-        eyebrow="Kabar pemerintah"
-        title="Berita"
         description="Berita resmi dan pembaruan kegiatan Pemerintah Provinsi Sumatera Barat."
+        eyebrow="Kabar pemerintah"
         metadata={
           <>
-            <StatusBadge variant="information">{newsItems.length} berita</StatusBadge>
+            <StatusBadge variant="information">
+              {newsItems.length} berita
+            </StatusBadge>
             <StatusBadge variant="official">Diperbarui berkala</StatusBadge>
           </>
         }
+        title="Berita"
       />
 
       <Section
-        title="Berita terbaru"
         description="Setiap kartu menampilkan sumber dan waktu publikasi agar warga dapat memindai informasi dengan cepat."
+        title="Berita terbaru"
       >
         {newsItems.length === 0 ? (
           <EmptyState
-            icon={<Newspaper className="h-7 w-7" aria-hidden />}
-            title="Belum ada berita"
             description="Berita resmi akan ditampilkan setelah data tersedia."
+            icon={<Newspaper aria-hidden className="h-7 w-7" />}
+            title="Belum ada berita"
             tone="information"
           />
         ) : (
@@ -35,17 +43,17 @@ export default function BeritaPage() {
             {newsItems.map((news, index) => (
               <ContentCard
                 key={news.id}
-                title={news.title}
-                description={news.summary}
                 date={news.date}
-                source={news.source}
+                description={news.summary}
+                href={`/informasi/berita/${news.id}`}
                 image={news.image}
                 imageAlt={news.title}
-                href={`/informasi/berita/${news.id}`}
                 layout="list"
+                priority={index === 0}
+                source={news.source}
                 status={index === 0 ? "Terbaru" : "Berita"}
                 statusVariant={index === 0 ? "official" : "information"}
-                priority={index === 0}
+                title={news.title}
               />
             ))}
           </div>

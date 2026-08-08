@@ -21,8 +21,8 @@ export interface BudayaCategory {
   created_at: string;
 }
 
-export type BudayaItemType = 'objek' | 'tradisi' | 'kuliner';
-export type BudayaItemStatus = 'draft' | 'published' | 'archived';
+export type BudayaItemType = "objek" | "tradisi" | "kuliner";
+export type BudayaItemStatus = "draft" | "published" | "archived";
 
 export interface BudayaItem {
   id: string;
@@ -83,7 +83,7 @@ export interface BudayaImage {
   created_at: string;
 }
 
-export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+export type ReviewStatus = "pending" | "approved" | "rejected";
 
 export interface BudayaReview {
   id: string;
@@ -99,7 +99,7 @@ export interface BudayaReview {
   updated_at: string;
 }
 
-export type EventStatus = 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+export type EventStatus = "upcoming" | "ongoing" | "completed" | "cancelled";
 
 export interface BudayaEvent {
   id: string;
@@ -140,8 +140,8 @@ export interface GetBudayaItemsParams {
   status?: BudayaItemStatus;
   limit?: number;
   offset?: number;
-  order_by?: 'rating' | 'reviews_count' | 'view_count' | 'created_at' | 'name';
-  order_direction?: 'asc' | 'desc';
+  order_by?: "rating" | "reviews_count" | "view_count" | "created_at" | "name";
+  order_direction?: "asc" | "desc";
 }
 
 export interface GetBudayaItemsResponse {

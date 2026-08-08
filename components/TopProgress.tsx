@@ -33,6 +33,7 @@ export default function TopProgress() {
         if (p >= 90) return p;
         // ease: increase smaller as it gets larger
         const next = p + Math.max(0.8, (90 - p) * 0.04);
+
         return next > 90 ? 90 : next;
       });
     }, 120);
@@ -54,11 +55,11 @@ export default function TopProgress() {
     start();
     // Heuristic finish after a short delay; you can tune this or tie to data fetching
     const t = setTimeout(finish, 700);
+
     return () => {
       clearTimeout(t);
       clear();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams?.toString()]);
 
   if (!visible && progress === 0) return null;

@@ -36,7 +36,10 @@ const periodeOptions = [
   "Tahun Lalu",
 ];
 
-const nilaiData: Record<string, { nilai: string; tingkat: string; responden: string }> = {
+const nilaiData: Record<
+  string,
+  { nilai: string; tingkat: string; responden: string }
+> = {
   "Bulan Lalu": { nilai: "4.69", tingkat: "93%", responden: "1.2K" },
   "Periode 1 (Jan-Apr)": { nilai: "4.65", tingkat: "91%", responden: "4.5K" },
   "Periode 2 (May-Aug)": { nilai: "4.72", tingkat: "94%", responden: "5.1K" },
@@ -68,6 +71,7 @@ export function SkmServiceFlow() {
     if (!selectedPeriode) {
       setShowResult(false);
       setError("Pilih periode terlebih dahulu untuk melihat nilai SKM.");
+
       return;
     }
 
@@ -78,37 +82,49 @@ export function SkmServiceFlow() {
   return (
     <PageShell as="main">
       <PageHeader
-        eyebrow="Layanan publik"
-        title="Survey Kepuasan Masyarakat"
+        actions={
+          <Link
+            className="civic-focus-ring inline-flex items-center justify-center gap-2 rounded-civic-lg bg-brand-gold-500 px-5 py-3 text-sm font-bold text-white shadow-civic-sm transition duration-civic hover:bg-brand-gold-600"
+            href={surveyFormUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Isi survei
+            <ExternalLink aria-hidden className="h-4 w-4" />
+          </Link>
+        }
         description="SKM membantu pemerintah daerah membaca kualitas pelayanan publik berdasarkan masukan warga. Data pada halaman ini masih bersifat statis sampai terhubung ke sumber resmi."
+        eyebrow="Layanan publik"
         metadata={
           <>
             <StatusBadge variant="official">SEPAKAT</StatusBadge>
             <StatusBadge variant="draft">Data statis</StatusBadge>
           </>
         }
-        actions={
-          <Link
-            href={surveyFormUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="civic-focus-ring inline-flex items-center justify-center gap-2 rounded-civic-lg bg-brand-gold-500 px-5 py-3 text-sm font-bold text-white shadow-civic-sm transition duration-civic hover:bg-brand-gold-600"
-          >
-            Isi survei
-            <ExternalLink className="h-4 w-4" aria-hidden />
-          </Link>
-        }
+        title="Survey Kepuasan Masyarakat"
       />
 
       <Section
-        title="Ringkasan tahun berjalan"
         description="Angka ditampilkan sebagai ringkasan mock/static saat ini. Jangan pakai sebagai publikasi final sebelum integrasi data resmi."
+        title="Ringkasan tahun berjalan"
       >
         <div className="grid gap-4 md:grid-cols-3">
           {[
-            { label: "Rata-rata kepuasan", value: yearlyMetric.nilai, icon: ClipboardCheck },
-            { label: "Tingkat kepuasan", value: yearlyMetric.tingkat, icon: BarChart3 },
-            { label: "Total responden", value: yearlyMetric.responden, icon: UsersRound },
+            {
+              label: "Rata-rata kepuasan",
+              value: yearlyMetric.nilai,
+              icon: ClipboardCheck,
+            },
+            {
+              label: "Tingkat kepuasan",
+              value: yearlyMetric.tingkat,
+              icon: BarChart3,
+            },
+            {
+              label: "Total responden",
+              value: yearlyMetric.responden,
+              icon: UsersRound,
+            },
           ].map((metric) => {
             const Icon = metric.icon;
 
@@ -118,7 +134,7 @@ export function SkmServiceFlow() {
                 className="rounded-civic-xl border border-civic-line bg-civic-cloud p-6 shadow-civic-xs"
               >
                 <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-civic-lg bg-brand-gold-100 text-brand-marawa-700">
-                  <Icon className="h-5 w-5" aria-hidden />
+                  <Icon aria-hidden className="h-5 w-5" />
                 </div>
                 <p className="civic-tabular text-4xl font-extrabold leading-none text-civic-text">
                   {metric.value}
@@ -134,9 +150,9 @@ export function SkmServiceFlow() {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <Section
-          title="Alur pengisian"
-          description="Warga dapat mengisi survei melalui formulir resmi dan membaca panduan sebelum mengirim masukan."
           className="mb-0"
+          description="Warga dapat mengisi survei melalui formulir resmi dan membaca panduan sebelum mengirim masukan."
+          title="Alur pengisian"
         >
           <div className="grid gap-4 md:grid-cols-3">
             {flowSteps.map((step, index) => (
@@ -156,40 +172,42 @@ export function SkmServiceFlow() {
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <ActionCard
-              title="Isi Survey Kepuasan Masyarakat"
+              actionLabel="Buka formulir"
               description="Buka formulir SKM untuk memberi penilaian layanan yang pernah digunakan."
               href={surveyFormUrl}
-              icon={<ClipboardCheck className="h-5 w-5" aria-hidden />}
+              icon={<ClipboardCheck aria-hidden className="h-5 w-5" />}
               status="Formulir"
               statusVariant="official"
-              actionLabel="Buka formulir"
+              title="Isi Survey Kepuasan Masyarakat"
             />
             <DocumentCard
-              title="Manual Book SEPAKAT"
+              actionLabel="Buka PDF"
               description="Panduan penggunaan layanan SKM dan pembacaan hasil survei."
-              href={manualBookUrl}
               fileType="PDF"
+              href={manualBookUrl}
+              icon={<BookOpen aria-hidden className="h-5 w-5" />}
               size="993 KB"
               source="Diskominfotik"
-              icon={<BookOpen className="h-5 w-5" aria-hidden />}
-              actionLabel="Buka PDF"
+              title="Manual Book SEPAKAT"
             />
           </div>
         </Section>
 
         <Section
-          title="Cek nilai SKM"
-          description="Pilih periode untuk melihat ringkasan nilai pada dataset saat ini."
           className="mb-0"
+          description="Pilih periode untuk melihat ringkasan nilai pada dataset saat ini."
+          title="Cek nilai SKM"
         >
           <div className="rounded-civic-xl border border-civic-line bg-civic-cloud p-5 shadow-civic-xs">
             <label
-              htmlFor="skm-period"
               className="mb-2 block text-sm font-semibold text-civic-text"
+              htmlFor="skm-period"
             >
               Periode penilaian
             </label>
             <select
+              aria-describedby={error ? "skm-period-error" : undefined}
+              className="civic-focus-ring w-full rounded-civic-lg border border-civic-line bg-civic-cloud px-3 py-3 text-sm font-semibold text-civic-text"
               id="skm-period"
               value={selectedPeriode}
               onChange={(event) => {
@@ -197,8 +215,6 @@ export function SkmServiceFlow() {
                 setShowResult(false);
                 setError("");
               }}
-              className="civic-focus-ring w-full rounded-civic-lg border border-civic-line bg-civic-cloud px-3 py-3 text-sm font-semibold text-civic-text"
-              aria-describedby={error ? "skm-period-error" : undefined}
             >
               <option value="">Pilih periode</option>
               {periodeOptions.map((option) => (
@@ -209,24 +225,27 @@ export function SkmServiceFlow() {
             </select>
 
             {error && (
-              <p id="skm-period-error" className="mt-2 text-sm font-semibold text-semantic-danger">
+              <p
+                className="mt-2 text-sm font-semibold text-semantic-danger"
+                id="skm-period-error"
+              >
                 {error}
               </p>
             )}
 
             <button
+              className="civic-focus-ring mt-4 inline-flex w-full items-center justify-center gap-2 rounded-civic-lg border border-brand-gold-300 bg-brand-gold-50 px-4 py-3 text-sm font-bold text-brand-gold-700 transition duration-civic hover:bg-brand-gold-100"
               type="button"
               onClick={handleShowResult}
-              className="civic-focus-ring mt-4 inline-flex w-full items-center justify-center gap-2 rounded-civic-lg border border-brand-gold-300 bg-brand-gold-50 px-4 py-3 text-sm font-bold text-brand-gold-700 transition duration-civic hover:bg-brand-gold-100"
             >
-              <Search className="h-4 w-4" aria-hidden />
+              <Search aria-hidden className="h-4 w-4" />
               Lihat nilai
             </button>
 
             {showResult && selectedMetric && (
               <div
-                role="status"
                 className="mt-5 rounded-civic-xl border border-brand-gold-200 bg-brand-gold-50 p-5"
+                role="status"
               >
                 <p className="text-sm font-semibold text-civic-textMuted">
                   Nilai SKM {selectedPeriode}
@@ -249,7 +268,10 @@ export function SkmServiceFlow() {
                   </div>
                 </div>
                 <p className="mt-4 flex items-start gap-2 text-sm leading-6 text-civic-textMuted">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-semantic-success" aria-hidden />
+                  <CheckCircle2
+                    aria-hidden
+                    className="mt-0.5 h-4 w-4 shrink-0 text-semantic-success"
+                  />
                   Kategori sementara: Sangat Baik.
                 </p>
               </div>
@@ -258,9 +280,12 @@ export function SkmServiceFlow() {
         </Section>
       </div>
 
-      <Section title="Catatan data" surface="stone">
+      <Section surface="stone" title="Catatan data">
         <div className="flex items-start gap-3 text-sm leading-6 text-civic-textMuted">
-          <FileText className="mt-0.5 h-4 w-4 shrink-0 text-semantic-primary" aria-hidden />
+          <FileText
+            aria-hidden
+            className="mt-0.5 h-4 w-4 shrink-0 text-semantic-primary"
+          />
           <p>
             Nilai SKM pada halaman ini masih mengikuti data statis proyek.
             Integrasi API, periode resmi, dan unit layanan perlu ditambahkan

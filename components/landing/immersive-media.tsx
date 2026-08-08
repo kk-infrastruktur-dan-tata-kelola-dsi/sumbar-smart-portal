@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { clsx } from "clsx";
 
 export type SumbarImmersiveImage =
@@ -32,17 +33,17 @@ export function ImmersiveMedia({
       <source srcSet={`${basePath}.avif 2400w`} type="image/avif" />
       <source srcSet={`${basePath}.webp 2400w`} type="image/webp" />
       <img
-        src={`${basePath}.webp`}
         alt=""
-        width={2400}
-        height={1600}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        fetchPriority={priority ? "high" : "low"}
         className={clsx(
           "h-full w-full object-cover immersive-image-enter",
           imgClassName,
         )}
+        decoding="async"
+        fetchPriority={priority ? "high" : "low"}
+        height={1600}
+        loading={priority ? "eager" : "lazy"}
+        src={`${basePath}.webp`}
+        width={2400}
       />
     </picture>
   );

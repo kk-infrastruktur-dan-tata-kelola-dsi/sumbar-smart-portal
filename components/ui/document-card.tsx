@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
+
 import { clsx } from "clsx";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { StatusBadge, type StatusBadgeVariant } from "./status-badge";
 
@@ -35,8 +36,8 @@ export function DocumentCard({
 }: DocumentCardProps) {
   const action = href ? (
     <Link
-      href={href}
       className="civic-focus-ring rounded-md px-2 py-1 text-sm font-semibold text-semantic-primary hover:bg-brand-gold-50"
+      href={href}
     >
       {actionLabel}
     </Link>
@@ -63,7 +64,9 @@ export function DocumentCard({
             <h3 className="text-base font-bold leading-snug text-civic-text">
               {title}
             </h3>
-            {status && <StatusBadge variant={statusVariant}>{status}</StatusBadge>}
+            {status && (
+              <StatusBadge variant={statusVariant}>{status}</StatusBadge>
+            )}
           </div>
 
           {description && (

@@ -1,5 +1,6 @@
-import { clsx } from "clsx";
 import type { ReactNode } from "react";
+
+import { clsx } from "clsx";
 
 export interface EmptyStateProps {
   title: string;
@@ -47,7 +48,9 @@ export function EmptyState({
           {description}
         </div>
       )}
-      {actions && <div className="mt-6 flex justify-center gap-3">{actions}</div>}
+      {actions && (
+        <div className="mt-6 flex justify-center gap-3">{actions}</div>
+      )}
     </div>
   );
 }

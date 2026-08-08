@@ -114,27 +114,117 @@ export const agendas = [
 ];
 
 export const photos = [
-  { id: "foto-1", title: "Kunjungan kerja Gubernur", date: "28 Oktober 2024", image: placeholderVertical, aspect: "portrait" as const },
-  { id: "foto-2", title: "Rapat koordinasi daerah", date: "27 Oktober 2024", image: placeholderHorizontal, aspect: "landscape" as const },
-  { id: "foto-3", title: "Peresmian gedung layanan publik", date: "26 Oktober 2024", image: placeholderVertical, aspect: "portrait" as const },
-  { id: "foto-4", title: "Forum pembangunan daerah", date: "25 Oktober 2024", image: placeholderHorizontal, aspect: "landscape" as const },
-  { id: "foto-5", title: "Kunjungan ke sentra UMKM", date: "24 Oktober 2024", image: placeholderVertical, aspect: "portrait" as const },
-  { id: "foto-6", title: "Pembukaan festival budaya", date: "23 Oktober 2024", image: placeholderHorizontal, aspect: "landscape" as const },
-  { id: "foto-7", title: "Pelatihan pemasaran digital", date: "22 Oktober 2024", image: placeholderVertical, aspect: "portrait" as const },
-  { id: "foto-8", title: "Seminar ekonomi kreatif", date: "21 Oktober 2024", image: placeholderHorizontal, aspect: "landscape" as const },
+  {
+    id: "foto-1",
+    title: "Kunjungan kerja Gubernur",
+    date: "28 Oktober 2024",
+    image: placeholderVertical,
+    aspect: "portrait" as const,
+  },
+  {
+    id: "foto-2",
+    title: "Rapat koordinasi daerah",
+    date: "27 Oktober 2024",
+    image: placeholderHorizontal,
+    aspect: "landscape" as const,
+  },
+  {
+    id: "foto-3",
+    title: "Peresmian gedung layanan publik",
+    date: "26 Oktober 2024",
+    image: placeholderVertical,
+    aspect: "portrait" as const,
+  },
+  {
+    id: "foto-4",
+    title: "Forum pembangunan daerah",
+    date: "25 Oktober 2024",
+    image: placeholderHorizontal,
+    aspect: "landscape" as const,
+  },
+  {
+    id: "foto-5",
+    title: "Kunjungan ke sentra UMKM",
+    date: "24 Oktober 2024",
+    image: placeholderVertical,
+    aspect: "portrait" as const,
+  },
+  {
+    id: "foto-6",
+    title: "Pembukaan festival budaya",
+    date: "23 Oktober 2024",
+    image: placeholderHorizontal,
+    aspect: "landscape" as const,
+  },
+  {
+    id: "foto-7",
+    title: "Pelatihan pemasaran digital",
+    date: "22 Oktober 2024",
+    image: placeholderVertical,
+    aspect: "portrait" as const,
+  },
+  {
+    id: "foto-8",
+    title: "Seminar ekonomi kreatif",
+    date: "21 Oktober 2024",
+    image: placeholderHorizontal,
+    aspect: "landscape" as const,
+  },
 ];
 
 export const infographics = [
-  { id: "info-1", title: "Pertumbuhan ekonomi Sumbar 2024", date: "28 Oktober 2024", image: placeholderVertical },
-  { id: "info-2", title: "Perkembangan UMKM digital", date: "25 Oktober 2024", image: placeholderVertical },
-  { id: "info-3", title: "Capaian pembangunan infrastruktur", date: "22 Oktober 2024", image: placeholderVertical },
-  { id: "info-4", title: "Indeks pembangunan manusia", date: "20 Oktober 2024", image: placeholderVertical },
-  { id: "info-5", title: "Peta potensi pariwisata daerah", date: "18 Oktober 2024", image: placeholderVertical },
-  { id: "info-6", title: "Statistik pendidikan Sumbar", date: "15 Oktober 2024", image: placeholderVertical },
+  {
+    id: "info-1",
+    title: "Pertumbuhan ekonomi Sumbar 2024",
+    date: "28 Oktober 2024",
+    image: placeholderVertical,
+  },
+  {
+    id: "info-2",
+    title: "Perkembangan UMKM digital",
+    date: "25 Oktober 2024",
+    image: placeholderVertical,
+  },
+  {
+    id: "info-3",
+    title: "Capaian pembangunan infrastruktur",
+    date: "22 Oktober 2024",
+    image: placeholderVertical,
+  },
+  {
+    id: "info-4",
+    title: "Indeks pembangunan manusia",
+    date: "20 Oktober 2024",
+    image: placeholderVertical,
+  },
+  {
+    id: "info-5",
+    title: "Peta potensi pariwisata daerah",
+    date: "18 Oktober 2024",
+    image: placeholderVertical,
+  },
+  {
+    id: "info-6",
+    title: "Statistik pendidikan Sumbar",
+    date: "15 Oktober 2024",
+    image: placeholderVertical,
+  },
 ];
 
 export const videos = [
-  { id: "6U_Fi8FzFYQ", title: "Pembangunan infrastruktur Sumbar", date: "28 Oktober 2024" },
-  { id: "DtxIaAY7Qto", title: "Program digitalisasi UMKM", date: "25 Oktober 2024" },
-  { id: "nZgRsT0t9lk", title: "Festival budaya Minangkabau", date: "20 Oktober 2024" },
+  {
+    id: "6U_Fi8FzFYQ",
+    title: "Pembangunan infrastruktur Sumbar",
+    date: "28 Oktober 2024",
+  },
+  {
+    id: "DtxIaAY7Qto",
+    title: "Program digitalisasi UMKM",
+    date: "25 Oktober 2024",
+  },
+  {
+    id: "nZgRsT0t9lk",
+    title: "Festival budaya Minangkabau",
+    date: "20 Oktober 2024",
+  },
 ];

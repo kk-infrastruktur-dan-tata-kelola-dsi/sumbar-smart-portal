@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
+
 import { clsx } from "clsx";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { StatusBadge, type StatusBadgeVariant } from "@/components/ui";
 
@@ -63,15 +64,15 @@ export function ContentCard({
     >
       <Image
         fill
-        priority={priority}
-        src={image}
         alt={imageAlt ?? title}
         className="object-cover transition duration-civic ease-civic group-hover:scale-[1.025]"
+        priority={priority}
         sizes={
           isList
             ? "(max-width: 768px) 100vw, 288px"
             : "(max-width: 768px) 100vw, 33vw"
         }
+        src={image}
       />
     </div>
   ) : null;
@@ -86,7 +87,9 @@ export function ContentCard({
               {eyebrow}
             </span>
           )}
-          {status && <StatusBadge variant={statusVariant}>{status}</StatusBadge>}
+          {status && (
+            <StatusBadge variant={statusVariant}>{status}</StatusBadge>
+          )}
         </div>
 
         <h3 className="text-lg font-bold leading-snug text-civic-text">
@@ -124,7 +127,7 @@ export function ContentCard({
   }
 
   return (
-    <Link href={href} className={cardClassName}>
+    <Link className={cardClassName} href={href}>
       {content}
     </Link>
   );

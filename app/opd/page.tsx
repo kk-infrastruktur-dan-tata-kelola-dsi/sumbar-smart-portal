@@ -13,7 +13,13 @@ import {
   WalletCards,
 } from "lucide-react";
 
-import { EmptyState, PageHeader, PageShell, Section, StatusBadge } from "@/components/ui";
+import {
+  EmptyState,
+  PageHeader,
+  PageShell,
+  Section,
+  StatusBadge,
+} from "@/components/ui";
 
 const tabs = [
   "Sekretaris Daerah",
@@ -83,20 +89,24 @@ export default function OPDPage() {
   return (
     <PageShell as="main">
       <PageHeader
-        eyebrow="Direktori pemerintah"
-        title="Organisasi Perangkat Daerah"
         description="Direktori OPD Provinsi Sumatera Barat dikelompokkan berdasarkan struktur pemerintahan agar warga dapat menemukan unit kerja secara cepat."
+        eyebrow="Direktori pemerintah"
         metadata={
           <>
-            <StatusBadge variant="information">{tabs.length} kategori</StatusBadge>
-            <StatusBadge variant="official">{activeItems.length} unit aktif</StatusBadge>
+            <StatusBadge variant="information">
+              {tabs.length} kategori
+            </StatusBadge>
+            <StatusBadge variant="official">
+              {activeItems.length} unit aktif
+            </StatusBadge>
           </>
         }
+        title="Organisasi Perangkat Daerah"
       />
 
       <Section
-        title="Kategori OPD"
         description="Gunakan kategori untuk menyaring unit kerja. Data kontak rinci dapat ditambahkan saat sumber resmi tersedia."
+        title="Kategori OPD"
       >
         <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
           {tabs.map((tab) => {
@@ -105,13 +115,13 @@ export default function OPDPage() {
             return (
               <button
                 key={tab}
-                type="button"
-                onClick={() => setSelectedTab(tab)}
                 className={`civic-focus-ring shrink-0 rounded-civic-lg border px-4 py-2 text-sm font-semibold transition duration-civic ${
                   isActive
                     ? "border-brand-gold-300 bg-brand-gold-50 text-brand-gold-700"
                     : "border-civic-line bg-civic-cloud text-civic-textMuted hover:border-brand-rantau-200 hover:text-civic-text"
                 }`}
+                type="button"
+                onClick={() => setSelectedTab(tab)}
               >
                 {tab}
               </button>
@@ -121,9 +131,9 @@ export default function OPDPage() {
 
         {activeItems.length === 0 ? (
           <EmptyState
-            icon={<Building2 className="h-7 w-7" aria-hidden />}
-            title="Data belum tersedia"
             description={`Data untuk kategori ${selectedTab} akan ditambahkan setelah sumber resmi tersedia.`}
+            icon={<Building2 aria-hidden className="h-7 w-7" />}
+            title="Data belum tersedia"
             tone="information"
           />
         ) : (
@@ -137,7 +147,7 @@ export default function OPDPage() {
                   className="rounded-civic-xl border border-civic-line bg-civic-cloud p-5 shadow-civic-xs transition duration-civic hover:-translate-y-0.5 hover:border-brand-gold-300 hover:shadow-civic-sm"
                 >
                   <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-civic-lg bg-brand-rantau-50 text-semantic-info">
-                    <Icon className="h-5 w-5" aria-hidden />
+                    <Icon aria-hidden className="h-5 w-5" />
                   </div>
                   <h3 className="text-base font-bold leading-snug text-civic-text">
                     {opd.name}

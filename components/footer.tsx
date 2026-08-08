@@ -40,11 +40,11 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-3">
               <Image
-                src="/images/sumbarmap.svg"
                 alt="Peta Sumatera Barat"
-                width={44}
-                height={44}
                 className="h-11 w-11"
+                height={44}
+                src="/images/sumbarmap.svg"
+                width={44}
               />
               <div>
                 <h2 className="font-bold text-white">Sumatera Barat</h2>
@@ -67,8 +67,8 @@ export default function Footer() {
                   {group.links.map((link) => (
                     <li key={link.href}>
                       <Link
-                        href={link.href}
                         className="text-white/68 transition duration-civic hover:text-brand-gold-200"
+                        href={link.href}
                       >
                         {link.label}
                       </Link>
@@ -128,8 +128,8 @@ export default function Footer() {
             <span aria-disabled="true">Kebijakan Privasi</span>
             <span aria-disabled="true">Syarat & Ketentuan</span>
             <Link
-              href="/informasi"
               className="transition duration-civic hover:text-brand-gold-200"
+              href="/informasi"
             >
               Sitemap
             </Link>

@@ -22,7 +22,8 @@ import { infographics, newsItems, photos, videos } from "@/config/content-data";
 const informationRoutes = [
   {
     title: "Berita",
-    description: "Kabar kegiatan dan kebijakan Pemerintah Provinsi Sumatera Barat.",
+    description:
+      "Kabar kegiatan dan kebijakan Pemerintah Provinsi Sumatera Barat.",
     href: "/informasi/berita",
     icon: Newspaper,
     status: "Berita resmi",
@@ -68,20 +69,20 @@ export default function InformasiPage() {
   return (
     <PageShell as="main">
       <PageHeader
-        eyebrow="Pusat informasi publik"
-        title="Informasi"
         description="Satu pintu untuk berita, pengumuman, agenda, dokumentasi, infografis, dan klarifikasi informasi Pemerintah Provinsi Sumatera Barat."
+        eyebrow="Pusat informasi publik"
         metadata={
           <>
             <StatusBadge variant="information">Konten publik</StatusBadge>
             <StatusBadge variant="official">Rute resmi</StatusBadge>
           </>
         }
+        title="Informasi"
       />
 
       <Section
-        title="Pilih kanal informasi"
         description="Kanal dikelompokkan berdasarkan kebutuhan warga, bukan berdasarkan komponen visual yang berbeda-beda."
+        title="Pilih kanal informasi"
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {informationRoutes.map((item) => {
@@ -90,13 +91,15 @@ export default function InformasiPage() {
             return (
               <ActionCard
                 key={item.href}
-                title={item.title}
+                actionLabel="Buka kanal"
                 description={item.description}
                 href={item.href}
-                icon={<Icon className="h-5 w-5" aria-hidden />}
+                icon={<Icon aria-hidden className="h-5 w-5" />}
                 status={item.status}
-                statusVariant={item.href === "/anti_hoax" ? "urgent" : "information"}
-                actionLabel="Buka kanal"
+                statusVariant={
+                  item.href === "/anti_hoax" ? "urgent" : "information"
+                }
+                title={item.title}
               />
             );
           })}
@@ -104,23 +107,23 @@ export default function InformasiPage() {
       </Section>
 
       <Section
-        title="Berita terbaru"
         description="Ringkasan berita resmi yang dapat dibuka ke halaman detail."
+        title="Berita terbaru"
       >
         <div className="grid gap-5 lg:grid-cols-2">
           {newsItems.slice(0, 2).map((news, index) => (
             <ContentCard
               key={news.id}
-              title={news.title}
-              description={news.summary}
               date={news.date}
-              source={news.source}
-              image={news.image}
+              description={news.summary}
               href={`/informasi/berita/${news.id}`}
+              image={news.image}
               layout="list"
+              priority={index === 0}
+              source={news.source}
               status={index === 0 ? "Terbaru" : "Berita"}
               statusVariant={index === 0 ? "official" : "information"}
-              priority={index === 0}
+              title={news.title}
             />
           ))}
         </div>
@@ -128,28 +131,28 @@ export default function InformasiPage() {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Section
-          title="Media publik"
-          description="Cuplikan foto, infografis, dan video dari kanal informasi."
           className="mb-0"
+          description="Cuplikan foto, infografis, dan video dari kanal informasi."
+          title="Media publik"
         >
           <div className="grid gap-5 md:grid-cols-2">
             <ContentCard
-              title={infographics[0].title}
-              date={infographics[0].date}
-              image={infographics[0].image}
-              href="/informasi/infografis"
               aspect="portrait"
+              date={infographics[0].date}
+              href="/informasi/infografis"
+              image={infographics[0].image}
               status="Infografis"
               statusVariant="information"
+              title={infographics[0].title}
             />
             <ContentCard
-              title={photos[0].title}
-              date={photos[0].date}
-              image={photos[0].image}
-              href="/informasi/foto"
               aspect="portrait"
+              date={photos[0].date}
+              href="/informasi/foto"
+              image={photos[0].image}
               status="Foto"
               statusVariant="information"
+              title={photos[0].title}
             />
           </div>
           <div className="mt-5">
@@ -158,22 +161,26 @@ export default function InformasiPage() {
         </Section>
 
         <Section
-          title="Pedoman teknis"
-          description="Dokumen pendukung perlu ditautkan ke berkas resmi sebelum dibuka sebagai unduhan."
           className="mb-0"
+          description="Dokumen pendukung perlu ditautkan ke berkas resmi sebelum dibuka sebagai unduhan."
+          title="Pedoman teknis"
         >
           <div className="space-y-4">
-            {["Aplikasi Web versi 1.0", "Standar publikasi konten", "Pengelolaan media daerah"].map((title) => (
+            {[
+              "Aplikasi Web versi 1.0",
+              "Standar publikasi konten",
+              "Pengelolaan media daerah",
+            ].map((title) => (
               <DocumentCard
                 key={title}
-                title={`Pedoman teknis ${title}`}
                 description="Metadata tersedia pada prototipe, berkas final belum ditautkan."
                 fileType="PDF"
+                icon={<FileText aria-hidden className="h-5 w-5" />}
                 size="2.5 MB"
                 source="Diskominfotik"
                 status="Butuh tautan"
                 statusVariant="draft"
-                icon={<FileText className="h-5 w-5" aria-hidden />}
+                title={`Pedoman teknis ${title}`}
               />
             ))}
           </div>

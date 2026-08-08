@@ -35,8 +35,10 @@ export default function MapSumbar({
     setMounted(true);
 
     const cssId = "leaflet-css";
+
     if (typeof document !== "undefined" && !document.getElementById(cssId)) {
       const link = document.createElement("link");
+
       link.id = cssId;
       link.rel = "stylesheet";
       link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
@@ -44,15 +46,20 @@ export default function MapSumbar({
         if (debug) console.info("[MapSumbar] Leaflet CSS loaded successfully");
       };
       link.onerror = (e) => {
-        console.warn("[MapSumbar] Failed to load Leaflet CSS. Interactivity/markers may be broken.", e);
+        console.warn(
+          "[MapSumbar] Failed to load Leaflet CSS. Interactivity/markers may be broken.",
+          e,
+        );
       };
       document.head.appendChild(link);
     }
 
     // Add custom styles for pin markers and tooltips
     const styleId = "leaflet-custom-pin";
+
     if (typeof document !== "undefined" && !document.getElementById(styleId)) {
       const style = document.createElement("style");
+
       style.id = styleId;
       style.textContent = `
         .custom-pin-icon {
@@ -123,15 +130,21 @@ export default function MapSumbar({
     }
 
     let cancelled = false;
+
     import("leaflet")
       .then((L) => {
         if (!cancelled) {
-          if (debug) console.info("[MapSumbar] Leaflet module loaded", { ua: navigator.userAgent });
+          if (debug)
+            console.info("[MapSumbar] Leaflet module loaded", {
+              ua: navigator.userAgent,
+            });
           setLmods(L);
         }
       })
       .catch(() => {
-        console.warn("[MapSumbar] Failed to dynamically import 'leaflet'. Map will not render.");
+        console.warn(
+          "[MapSumbar] Failed to dynamically import 'leaflet'. Map will not render.",
+        );
       });
 
     return () => {
@@ -175,7 +188,10 @@ export default function MapSumbar({
       });
 
       const rect = containerRef.current?.getBoundingClientRect();
-      const cs = containerRef.current ? window.getComputedStyle(containerRef.current) : null;
+      const cs = containerRef.current
+        ? window.getComputedStyle(containerRef.current)
+        : null;
+
       console.info("[MapSumbar] Container metrics", {
         rect,
         pointerEvents: cs?.pointerEvents,
@@ -191,7 +207,10 @@ export default function MapSumbar({
       const onContainerClick = (ev: MouseEvent) => {
         const { clientX, clientY } = ev;
         // @ts-ignore elementsFromPoint exists in all target browsers
-        const stack = document.elementsFromPoint(clientX, clientY) as HTMLElement[];
+        const stack = document.elementsFromPoint(
+          clientX,
+          clientY,
+        ) as HTMLElement[];
         const summary = stack.slice(0, 8).map((el) => ({
           tag: el.tagName,
           id: el.id,
@@ -199,13 +218,19 @@ export default function MapSumbar({
           z: window.getComputedStyle(el).zIndex,
           pe: window.getComputedStyle(el).pointerEvents,
         }));
+
         console.debug("[MapSumbar] Click stack (top->bottom)", summary);
       };
-      containerRef.current?.addEventListener("click", onContainerClick, { capture: true });
+
+      containerRef.current?.addEventListener("click", onContainerClick, {
+        capture: true,
+      });
 
       // Cleanup
       return () => {
-        containerRef.current?.removeEventListener("click", onContainerClick, { capture: true } as any);
+        containerRef.current?.removeEventListener("click", onContainerClick, {
+          capture: true,
+        } as any);
       };
     }
 
@@ -244,27 +269,30 @@ export default function MapSumbar({
         radius: isSel ? 12 : 10,
         fillColor: fill,
         fillOpacity: 0.9,
-        color: isSel ? "var(--color-civic-primary)" : "var(--color-civic-cloud)",
+        color: isSel
+          ? "var(--color-civic-primary)"
+          : "var(--color-civic-cloud)",
         weight: isSel ? 3 : 2,
         interactive: true,
-        bubblingMouseEvents: false
+        bubblingMouseEvents: false,
       }).addTo(layer);
-      
+
       // Tooltip on hover (shows kabupaten name + count)
       const tooltipContent = `<div style="text-align: center;"><strong>${kab.name}</strong><br/><span style="font-size: 11px; color: var(--color-civic-text-muted);">${itemCount} item budaya</span></div>`;
-      marker.bindTooltip(tooltipContent, { 
-        direction: "top", 
-        offset: [0, -15], 
+
+      marker.bindTooltip(tooltipContent, {
+        direction: "top",
+        offset: [0, -15],
         opacity: 0.95,
-        className: "custom-tooltip"
+        className: "custom-tooltip",
       });
 
       // Store marker data
       (marker as any)._kabKey = kab.key;
       (marker as any)._kabName = kab.name;
-      
+
       // Click handler - works in all browsers with CircleMarker!
-      marker.on('click', (e: any) => {
+      marker.on("click", (e: any) => {
         if (debug) {
           console.info("[MapSumbar] CircleMarker clicked", { key: kab.key });
         }
@@ -272,18 +300,18 @@ export default function MapSumbar({
         try {
           onSelect(kab.key);
         } catch (err) {
-          console.error('[MapSumbar] Error in marker click:', err);
+          console.error("[MapSumbar] Error in marker click:", err);
         }
       });
-      
+
       // Hover effect - enlarge circle slightly
-      marker.on('mouseover', () => {
+      marker.on("mouseover", () => {
         if (!isSel) {
           marker.setStyle({ radius: 12 });
         }
       });
-      
-      marker.on('mouseout', () => {
+
+      marker.on("mouseout", () => {
         if (!isSel) {
           marker.setStyle({ radius: 10 });
         }
@@ -292,7 +320,7 @@ export default function MapSumbar({
 
     layer.addTo(mapRef.current);
     markersLayerRef.current = layer;
-    
+
     if (debug) {
       console.info("[MapSumbar] Rendered CircleMarkers", {
         count: items.length,
@@ -306,6 +334,10 @@ export default function MapSumbar({
   if (!mounted) return null;
 
   return (
-    <div ref={containerRef} style={{ height: "100%", width: "100%" }} className="relative bg-civic-stone" />
+    <div
+      ref={containerRef}
+      className="relative bg-civic-stone"
+      style={{ height: "100%", width: "100%" }}
+    />
   );
 }

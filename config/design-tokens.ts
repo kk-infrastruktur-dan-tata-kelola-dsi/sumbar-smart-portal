@@ -196,4 +196,3 @@ export const designTokens = {
 } as const;
 
 export type DesignTokens = typeof designTokens;
-

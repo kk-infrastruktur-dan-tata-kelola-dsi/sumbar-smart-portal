@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
+
 import { clsx } from "clsx";
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { StatusBadge, type StatusBadgeVariant } from "./status-badge";
 
@@ -71,7 +72,7 @@ export function ActionCard({
   }
 
   return (
-    <Link href={href} className={classNames}>
+    <Link className={classNames} href={href}>
       {content}
     </Link>
   );

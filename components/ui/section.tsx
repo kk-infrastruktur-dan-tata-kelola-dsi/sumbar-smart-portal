@@ -1,5 +1,6 @@
-import { clsx } from "clsx";
 import type { ReactNode } from "react";
+
+import { clsx } from "clsx";
 
 export interface SectionProps {
   children: ReactNode;
@@ -32,7 +33,7 @@ export function Section({
   surface = "none",
 }: SectionProps) {
   return (
-    <section id={id} className={clsx("py-8 lg:py-10", className)}>
+    <section className={clsx("py-8 lg:py-10", className)} id={id}>
       <div className={surfaceClass[surface]}>
         {(title || description || eyebrow || actions) && (
           <div className="mb-6 grid gap-4 border-b border-civic-line pb-5 md:grid-cols-[1fr_auto] md:items-end">

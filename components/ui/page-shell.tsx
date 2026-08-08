@@ -1,5 +1,6 @@
-import { clsx } from "clsx";
 import type { ReactNode } from "react";
+
+import { clsx } from "clsx";
 
 type PageShellWidth = "content" | "wide" | "prose" | "full";
 
@@ -27,10 +28,7 @@ export function PageShell({
 }: PageShellProps) {
   return (
     <Component
-      className={clsx(
-        "min-h-screen bg-civic-paper text-civic-text",
-        className,
-      )}
+      className={clsx("min-h-screen bg-civic-paper text-civic-text", className)}
     >
       <div
         className={clsx(
